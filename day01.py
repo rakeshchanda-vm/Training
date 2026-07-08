@@ -1,3 +1,4 @@
+### Day 01 of Coding ###
 from langchain_community.document_loaders import TextLoader
 from langchain_ollama import OllamaLLM
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, PydanticOutputParser
