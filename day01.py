@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel,Field
 
 
-text_laoding = TextLoader("/home/rakeshchanda/TrainingFolder/CodingLive/the-verdict.txt")
+text_laoding = TextLoader("./the-verdict.txt")
 docs = text_laoding.load()
 docu_text = docs[0].page_content
 
@@ -16,6 +16,7 @@ class DocumentParser(BaseModel):
 
 
 llm = OllamaLLM(model="llama3.2:3b",temperature=0.4,max_tokens= 500)
+
 
 parser = StrOutputParser()
 new_parser = PydanticOutputParser(pydantic_object=DocumentParser)
@@ -38,5 +39,3 @@ message = chain.invoke({
 })
 
 print(message)
-print(message.model_dump())
-print(type(message))
