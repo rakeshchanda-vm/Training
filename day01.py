@@ -15,7 +15,7 @@ class DocumentParser(BaseModel):
     desc:str = Field(description="Short explanation in 4-5 lines")
 
 
-llm = OllamaLLM(model="llama3.2:3b",temperature=0.4,max_tokens= 500)
+llm = OllamaLLM(model="qwen3:4b",temperature=0.4,max_tokens= 500)
 
 
 parser = StrOutputParser()
