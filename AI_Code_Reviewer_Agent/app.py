@@ -237,17 +237,11 @@ builder.add_edge("final_report", END)
 
 graph = builder.compile()
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage:")
-        print("python graph.py samples/buggy_code.py")
-        exit()
+result = graph.invoke({"file_path":sys.argv[1]})
 
-    result = graph.invoke({"file_path":sys.argv[1]})
+print("\n")
+print("="*70)
+print(" AI CODE REVIEW REPORT ")
+print("="*70)
 
-    print("\n")
-    print("="*70)
-    print(" AI CODE REVIEW REPORT ")
-    print("="*70)
-
-    print(result["final_report"])
+print(result["final_report"])
