@@ -150,7 +150,8 @@ research_agent = AgentExecutor(
     agent=agent,
     tools=tools,
     verbose=True,
-    max_iterations=10
+    max_iterations=10,
+    return_intermediate_steps=True
     )
 
 
@@ -158,4 +159,8 @@ question=input("Topic of Research: ")
 
 result = research_agent.invoke({"input":question})
 
+# print(result)
+print()
+print("*"*50)
+print()
 print(result["output"])
