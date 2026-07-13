@@ -211,9 +211,7 @@ def final_agent(state):
     return {"final_report":response.content}
 
 
-builder = StateGraph(
-    ReviewState
-)
+builder = StateGraph(ReviewState)
 
 
 builder.add_node("loader",load_code)
