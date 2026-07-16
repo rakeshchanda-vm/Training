@@ -1,2 +1,2 @@
 # Training
-This repo is created for training purposes.
+This repo is newly created for training purposes.

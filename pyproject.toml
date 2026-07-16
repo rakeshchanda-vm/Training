@@ -1,0 +1,198 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "andromeda"
+version = "1.1.10"
+description = "A powerful multi-agent framework for developer friendly experiences"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Jefferson Nelsson", email = "jefferson.nelsson@valuemomentum.com"},
+    {name = "Lunafreya Celestine", email = "lunafreya.celestine@valuemomentum.com"}
+]
+maintainers = [
+    {name = "Jefferson Nelsson", email = "jefferson.nelsson@valuemomentum.com"},
+    {name = "Lunafreya Celestine", email = "lunafreya.celestine@valuemomentum.com"}
+]
+keywords = ["ai", "agents", "llm", "langchain", "langgraph", "research", "analysis", "multi-agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=1.0,<2.0",
+    "colorama>=0.4.6",
+    "tavily-python==0.7.13",
+    "pyeztrace>=0.0.7",
+    "pytest>=8.4.1",
+    "aiohttp>=3.12.0",
+    "pydantic>=2.11.0",
+    "pydantic-settings>=2.0.0",
+    "langchain-core>=1.0,<2.0",
+    "langchain>=1.0,<2.0",
+    "langsmith>=0.1.0",
+    "tiktoken>=0.5.0",
+    "tenacity>=8.0.0",
+    "pyyaml>=6.0.0",
+    "cryptography>=42.0.0",
+]
+
+[project.optional-dependencies]
+retriever = [
+    "langchain-text-splitters>=0.3.0",
+    "rank-bm25>=0.2.2",
+]
+retrievers = [
+    "langchain-text-splitters>=0.3.0",
+    "rank-bm25>=0.2.2",
+]
+retrievers-azure = [
+    "langchain-azure-ai>=0.1.0",
+    "azure-search-documents>=11.6.0",
+]
+retrievers-chroma = [
+    "langchain-chroma>=0.2.0",
+    "chromadb>=0.5.0",
+]
+retrievers-faiss = [
+    "faiss-cpu>=1.8.0",
+    "numpy>=1.26",  # andromeda.ports.faiss + _vector_math (was provided via langchain-community)
+]
+retrievers-mongo = [
+    "langchain-mongodb>=0.2.0",
+    "pymongo>=4.6.0",
+]
+retrievers-nlp = [
+    "spacy>=3.7.0",
+]
+retrievers-opensearch = [
+    "opensearch-py>=2.4.0",
+    "numpy>=1.26",  # andromeda.ports.opensearch + _vector_math (was provided via langchain-community)
+]
+retrievers-postgres = [
+    "sqlalchemy>=2.0.0",
+    "langchain-postgres>=0.0.12",
+    "psycopg[binary]>=3.2.0",
+]
+checkpointer-postgres = [
+    "langgraph-checkpoint-postgres>=3.0,<4.0",
+    "psycopg[binary]>=3.2.0",
+]
+mcp = [
+    "mcp==1.22.0",
+]
+openai = [
+    "langchain-openai>=1.0,<2.0",
+]
+github-copilot = [
+    "langchain-openai>=0.3,<2.0",
+]
+openai-codex = [
+    # ChatGPT-subscription (OAuth) auth against the Codex backend.
+    # _ChatOpenAICodex / chatgpt_oauth first shipped in langchain-openai 1.3.1.
+    "langchain-openai>=1.3.1,<2.0",
+]
+ops = [
+    # langfuse 4.0 introduced breaking changes; pin to 3.x until we migrate
+    "langfuse>=3.14.2,<4.0.0",
+]
+
+cli = [
+    "click>=8.1.0",
+    "rich>=13.7.0",
+    "questionary>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/AI-Emerging-Tech/ET-Agentify.git"
+Documentation = "https://valuemomentum.studio/andromeda"
+Repository = "https://github.com/AI-Emerging-Tech/ET-Agentify.git"
+Issues = "https://github.com/AI-Emerging-Tech/ET-Agentify.git/issues"
+Changelog = "https://github.com/AI-Emerging-Tech/ET-Agentify.git/blob/main/CHANGELOG.md"
+
+[project.scripts]
+andromeda = "andromeda.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["andromeda*"]
+exclude = ["tests*", "docs*"]
+
+[tool.setuptools.package-data]
+"andromeda" = ["*.txt", "*.md", "*.yaml", "*.yml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--verbose",
+    "--tb=short",
+    "--strict-markers",
+    "--disable-warnings",
+    "--color=yes",
+]
+markers = [
+    "integration: integration tests that require external runtime dependencies",
+    "requires_bubblewrap: requires bubblewrap (bwrap) on the host",
+    "requires_gvisor: requires Docker with runsc runtime configured",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+ignore_errors = true
