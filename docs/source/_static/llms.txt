@@ -1,0 +1,1161 @@
+# Andromeda Framework
+
+## 1. Workflow Building with `WorkflowBuilder` and `WorkflowExpression`
+
+### 1.1. Concepts
+
+- **Workflow**: A directed graph of steps where each step is a Python callable that reads and updates a shared `state` (a mapping/dict).
+- **State**: A mutable mapping (dict-like) that flows through the workflow. Steps **read keys** and **write keys** on it.
+- **Execution**: Workflows are compiled to a LangGraph `StateGraph` under the hood, but you never have to call LangGraph directly.
+
+All workflow APIs live in `andromeda.core.workflow`:
+
+```python
+from andromeda.core.workflow import (
+    WorkflowBuilder,
+    WorkflowExpression,
+    task,
+    conditional,
+    parallel,
+    Command,
+    SystemMessage,
+    HumanMessage,
+    AIMessage,
+)
+```
+
+There are **two authoring styles**:
+
+1. **Declarative DSL** using `WorkflowBuilder` methods like `.start()`, `.then()`, `.branch()`, `.run()`, `.checkpoint()`, etc.
+2. **Operator workflows** using `@task` + `>>` + `conditional()` + `parallel()` to build a `WorkflowExpression`, then wrapping it with `WorkflowBuilder.from_expression(...)`.
+
+Internally, both use the same execution engine (`WorkflowBase`) and produce LangGraph graphs.
+
+---
+
+### 1.2. Declarative Workflows with `WorkflowBuilder`
+
+#### 1.2.1. Basic shape
+
+```python
+from typing import Dict, Any
+from andromeda.core.workflow import WorkflowBuilder
+
+def ingest_data(state: Dict[str, Any]) -> Dict[str, Any]:
+    # Read from state
+    query = state.get("query", "")
+    # Write new keys onto state
+    return {
+        "raw_results": [f"Result for {query} from web", f"Result for {query} from docs"],
+    }
+
+def validate_data(state: Dict[str, Any]) -> Dict[str, Any]:
+    results = state.get("raw_results", [])
+    # Add a validation flag
+    return {
+        "validated_results": results,
+        "is_valid": len(results) >= 1,
+    }
+
+def generate_summary(state: Dict[str, Any]) -> Dict[str, Any]:
+    results = state.get("validated_results", [])
+    summary = " | ".join(results)
+    return {"summary": summary}
+
+# StateModel is a TypedDict or Pydantic model that defines the structure of the state
+from typing import TypedDict
+class StateModel(TypedDict):
+    # messages: list[BaseMessage] is mandatory field for agents
+    # This example does not use an Agent, so we don't need to define it
+    query: str
+    validated_results: list[str]
+    is_valid: bool
+    summary: str
+
+workflow = WorkflowBuilder(name="SimpleResearchWorkflow", state_schema=StateModel)
+
+(
+    workflow
+    .start("ingest")          # logical step name
+        .run(ingest_data)     # callable takes the current state dict
+    .then("validate")
+        .run(validate_data)
+    .then("summarize")
+        .run(generate_summary)
+)
+
+# Initial state must be a dict. It is merged with step outputs as you go.
+initial_state = {"query": "LLM safety best practices"}
+result_state = workflow.execute(state=initial_state)
+
+# `result_state` is the final state dict after all steps.
+summary = result_state["summary"]
+```
+
+**Key points:**
+
+- **Each `.start()` / `.then()` / `.finish()` identifies a logical step.**
+  - The **step name becomes a key** in the final state if a step returns a non-mapping value.
+  - If a step returns a `dict`/`MutableMapping`, those keys are merged into the global state.
+- `.run(func)` associates a Python callable with the current step.
+  - The callable usually receives a **dict-like `state`** and returns either:
+    - A `dict` with updates to merge.
+    - A `Command` (from `langgraph.types`) to control flow (e.g. `goto`/`resume`).
+    - Any other value, which will be stored under the step’s name in state.
+- The workflow engine ensures **safe merging** of dict updates even in parallel branches (using `Annotated[dict, operator.or_]`, but this can be overridden by using custom annotations in state_schema).
+
+#### 1.2.2. Routing on success/failure
+
+You can route based on whether a step raised an exception:
+
+```python
+def risky_step(state: Dict[str, Any]) -> Dict[str, Any]:
+    if state.get("should_fail"):
+        raise RuntimeError("Something went wrong")
+    return {"status": "ok"}
+
+def handle_failure(state: Dict[str, Any]) -> Dict[str, Any]:
+    return {"status": "failed", "error_handled": True}
+
+def handle_success(state: Dict[str, Any]) -> Dict[str, Any]:
+    return {"status": "completed"}
+
+wf = WorkflowBuilder(name="RoutingExample") # if state_schema is not provided, the state will be a dict. This is not recommended.
+(
+    wf
+    .start("do_risky_thing")
+        .run(risky_step)
+        .if_fails().goto("on_failure")
+        .if_succeeds().goto("on_success")
+    .then("on_failure")
+        .run(handle_failure)
+    .then("on_success")
+        .run(handle_success)
+)
+
+state = {"should_fail": True}
+final_state = wf.execute(state=state)
+# final_state["status"] == "failed"
+```
+
+**How this works internally:**
+
+- If `risky_step` raises an exception:
+  - The engine catches it, sets `state["__route__"] = "failure"` and `state["__error__"] = exc`.
+  - Routing uses `.if_fails().goto("on_failure")` to choose where to go.
+- If it returns successfully:
+  - It sets `state["__route__"] = "success"` and uses `.if_succeeds()` if present.
+
+#### 1.2.3. Parallel branches
+
+Parallel branches share and merge the same dict state:
+
+```python
+def compute_sum(state: Dict[str, Any]) -> Dict[str, Any]:
+    numbers = state.get("numbers", [])
+    return {"sum": sum(numbers)}
+
+def compute_count(state: Dict[str, Any]) -> Dict[str, Any]:
+    numbers = state.get("numbers", [])
+    return {"count": len(numbers)}
+
+wf = WorkflowBuilder(name="ParallelExample", state_schema=StateModel)
+(
+    wf
+    .start("prepare")
+        .run(lambda s: {"numbers": [1, 2, 3, 4, 5]})
+    .branch("analytics")
+        .parallel([
+            ("sum_step", compute_sum),
+            ("count_step", compute_count),
+        ])
+        .merge_results()  # hint/no-op; results are already merged
+    .finish("done")
+        .run(lambda s: s)  # identity
+)
+
+out = wf.execute(state={})
+# out["sum"] == 15, out["count"] == 5
+```
+
+**Important details:**
+
+- `branch(name)` is a **logical container**; actual graph nodes are the child names (`"sum_step"`, `"count_step"`).
+- Each child callable gets the **whole shared state** and returns updates, which are merged.
+- `merge_results()` is currently a **no-op hint** kept for backward compatibility; you can still read merged keys directly from state.
+
+#### 1.2.4. Checkpoints and human approval
+
+Checkpoints use LangGraph `interrupt` under the hood to pause execution and wait for external input:
+
+```python
+from andromeda.core.workflow import Command
+
+def expensive_step(state: Dict[str, Any]) -> Dict[str, Any]:
+    # produce some draft result
+    return {"draft": "Initial analysis of the dataset."}
+
+workflow = WorkflowBuilder(name="CheckpointExample", state_schema=StateModel)
+
+(
+    workflow
+    .start("analyze")
+        .run(expensive_step)
+    .checkpoint("human_review")
+        .pause_for_approval("Please review 'draft' and provide corrections.")
+    .finish("finalize")
+        .run(lambda s: {"final": s.get("draft", "")})
+)
+
+# First run
+result = workflow.execute(state={})
+
+if "__interrupt__" in result:
+    # Engine has paused; `result["__interrupt__"]` contains payload with
+    # checkpoint name, message, and current state. An external process
+    # can now decide how to resume.
+    interrupt_payload = result["__interrupt__"]
+    # Example: human edits the draft
+    updated_state = dict(interrupt_payload["state"])
+    updated_state["draft"] = "Human-corrected analysis."
+
+    # Resume via Command
+    resume_cmd = Command(update=updated_state)
+    resumed = workflow.execute(state=None, resume=resume_cmd)
+    final = resumed["final"]
+```
+
+**What the checkpoint node does:**
+
+- Emits an `interrupt({...})` with:
+  - `checkpoint`: checkpoint name.
+  - `message`: approval message.
+  - `state`: current state.
+- Consumers can:
+  - Return a `Command` (with `update` and optional `goto`) to update state and/or route.
+  - Return a dict to merge into state and continue.
+  - Return nothing, in which case the original state is reused and an `__interrupt__` key is preserved for inspection.
+
+---
+
+### 1.3. Operator Workflows with `WorkflowExpression`
+
+`WorkflowExpression` lets you build pipelines over a **single “current value”** instead of full dict state.
+Internally, it keeps this value in `state["__internal__"]["current"]`.
+
+You create expressions with `conditional`, `parallel`, and `>>`:
+
+```python
+from typing import List
+from andromeda.core.workflow import WorkflowBuilder, conditional, parallel
+
+def fetch_articles(state: dict) -> dict:
+    return {"articles": [f"Article about {state['query']} - A", f"Article about {state['query']} - B"]}
+
+def filter_relevant(state: dict) -> dict:
+    # In a real system this would use semantic filters; here we keep all.
+    return [a for a in state['articles'] if "Article" in a]
+
+def summarize_list(state: dict) -> dict:
+    return {"summary": " | ".join(state['articles'])}
+
+flow = (
+    fetch_articles
+    >> filter_relevant
+    >> conditional(
+        true_branch=summarize_list,
+        false_branch=lambda state: {"summary": "No articles found."},
+        condition=lambda state: len(state['articles']) > 0,
+    )
+)
+
+builder = WorkflowBuilder.from_expression(flow, name="ExpressionWorkflow")
+
+out_state = builder.execute(state={"query": "AI in healthcare"})
+# Because `WorkflowBuilder` was created from an expression, `_post_process`
+# unwraps the state and returns the final value directly:
+final_value = out_state["summary"]  # "Article about AI in healthcare - A | ..."
+```
+
+**Critical properties:**
+
+- In **expression mode**:
+  - Input `state` to `.execute(state=...)` is treated as the **initial current value**, not a dict.
+  - The final output of `.execute()` is the state dict after all steps have been executed.
+- `conditional(true_branch, false_branch, condition=...)`:
+  - `condition` takes the current value and returns `bool`.
+  - `true_branch` and `false_branch` may be either:
+    - Another `WorkflowExpression`, or
+    - A plain callable taking `(state: dict) -> dict`.
+- `parallel(fn1, fn2, ...)`:
+  - When executed via a plain expression (without `WorkflowBuilder`), it runs the branches **sequentially** and returns a **list of their results**.
+  - When compiled via `WorkflowBuilder.from_expression`, it is expanded into **real parallel branches** in LangGraph, then joined into a list of results.
+
+Example with `parallel` inside an expression:
+
+```python
+def expand_query(query: str) -> List[str]:
+    return {"articles": [query, query + " 2025", query + " market size"]}
+
+def analyze_one(state: dict) -> dict:
+    return {"summary": f"Analysis for: {state['query']}"}
+
+analysis_flow = (
+    expand_query
+    >> parallel(
+        analyze_one,
+        analyze_one,
+        analyze_one,
+    )
+)
+
+builder = WorkflowBuilder.from_expression(analysis_flow, name="ParallelExpression")
+value = builder.execute(state={"query": "LLM tooling"})
+# value is a dict with the keys "articles" and "summary". Summaries are overridden by the last analyze_one call in this example.
+```
+
+---
+
+## 2. Using `get_chat_model` and `ModelConfig`
+
+### 2.1. `ModelConfig` (Pydantic model)
+
+Located in `andromeda.config`:
+
+```python
+from typing import Optional, Dict, Any, Union
+from pydantic import BaseModel, Field
+
+class ModelConfig(BaseModel):
+    name: str
+    provider: str
+    temperature: float = Field(default=1.0)
+    other_args: dict = Field(default_factory=dict)
+    model_config = {"arbitrary_types_allowed": True}
+```
+
+**Semantics:**
+
+- **`name`**: Model identifier, passed directly to the selected provider.
+- **`provider`**: Logical provider name used by `get_chat_model`:
+  - Most providers are passed as `model_provider` to `langchain.chat_models.init_chat_model`. Examples: `"ollama"`, `"openai"`, `"bedrock"`, `"azure_openai"`, `"litellm"`, etc., depending on your environment.
+  - `"litellm"`, `"github_copilot"`, and `"openai_codex"` are handled by dedicated branches in `get_chat_model` / `get_embedding_model` rather than `init_chat_model` (see 2.3 for GitHub Copilot, 2.4 for ChatGPT/Codex).
+- **`temperature`**: Sampling temperature (often forwarded via `other_args`).
+- **`other_args`**: Free-form dict passed through to the provider, e.g. `{"base_url": "...", "api_key": "...", "model_kwargs": {...}}`.
+
+### 2.2. `get_chat_model` implementation and usage
+
+Defined in `andromeda.utils.langtils`:
+
+```python
+from langchain.chat_models import init_chat_model
+from langchain_core.language_models import BaseChatModel
+from andromeda.config import ModelConfig
+
+def get_chat_model(model_config: ModelConfig) -> BaseChatModel:
+    return init_chat_model(
+        model_config.name,
+        model_provider=model_config.provider,
+        **model_config.other_args,
+    )
+```
+
+**Behavior:**
+
+- Returns a LangChain `BaseChatModel` instance configured for the specified provider.
+- All `other_args` are forwarded as keyword arguments to `init_chat_model`. This is where you set provider-specific items:
+  - For OpenAI-like APIs: `{"api_key": "...", "base_url": "...", "temperature": 0.3}`
+  - For Ollama: `{"base_url": "http://localhost:11434"}`is the default base URL.
+
+#### 2.2.1. Example: Local Ollama model
+
+```python
+from andromeda.config import ModelConfig
+from andromeda.utils.langtils import get_chat_model
+
+model_config = ModelConfig(
+    name="llama3.1:8b",
+    provider="ollama",
+    other_args={
+        "base_url": "http://localhost:11434",
+        "temperature": 0.2,
+    },
+)
+
+model = get_chat_model(model_config)
+response = model.invoke("Explain retrieval-augmented generation in 3 bullet points.")
+```
+
+#### 2.2.2. Example: OpenAI-compatible endpoint + structured output
+
+```python
+model_config = ModelConfig(
+    name="gpt-4o-mini",
+    provider="openai",
+    other_args={
+        "api_key": "sk-...",  # or rely on environment variable
+        "temperature": 0.3,
+    },
+)
+
+class Summary(BaseModel):
+    summary: str
+
+model = get_chat_model(model_config)
+response = model.with_structured_output(Summary).invoke("Summarize the key benefits of Andromeda's multi-agent design.")
+print(response.summary)
+```
+
+#### 2.2.3. Example: Using `get_chat_model` inside an `Agent`
+
+In `andromeda.core.agent.Agent.__init__`:
+
+```python
+from andromeda.utils.langtils import get_chat_model
+from andromeda.config import AgentConfig
+
+class Agent:
+    def __init__(self, agent_config: AgentConfig) -> None:
+        self.name = agent_config.name
+        self.model = get_chat_model(model_config=agent_config.model)
+        # ...
+```
+
+**Do not re-implement** `get_chat_model`; use it whenever constructing models for agents, planners, or report writers.
+
+### 2.3. GitHub Copilot provider (`provider="github_copilot"`)
+
+Use an existing GitHub Copilot subscription as a chat **and** embeddings provider via
+Copilot's OpenAI-compatible APIs (`https://api.githubcopilot.com`). Requires the optional
+extra: `pip install "andromeda[github-copilot]"`.
+
+Implemented in `andromeda.utils.github_copilot` as `ChatGithubCopilot` (a `ChatOpenAI`
+subclass) and `GithubCopilotEmbeddings` (an `OpenAIEmbeddings` subclass). Because they are
+ordinary LangChain models, all orchestration, tools, memory, callbacks and streaming work
+unchanged.
+
+```python
+from andromeda.config import ModelConfig
+from andromeda.utils.langtils import get_chat_model, get_embedding_model
+
+# Chat
+model = get_chat_model(ModelConfig(provider="github_copilot", name="gpt-4o"))
+print(model.invoke("Hello!").content)
+
+# Embeddings
+emb = get_embedding_model(ModelConfig(provider="github_copilot", name="text-embedding-3-small"))
+vec = emb.embed_query("hello world")
+```
+
+**Authentication** is discovered automatically (no API keys needed when a Copilot login
+already exists on the machine), trying in order: an explicit `copilot_token` → ready Copilot
+token env (`GITHUB_COPILOT_TOKEN` / `COPILOT_API_KEY`) → cached Copilot token
+(`~/.andromeda-copilot.json`) → a GitHub OAuth/PAT (`other_args["github_token"]`, then
+`GITHUB_TOKEN` / `GH_TOKEN`, the editor's `~/.config/github-copilot` auth files, or cache)
+exchanged for a short-lived Copilot token. Short-lived tokens are refreshed automatically
+(proactively near expiry, reactively on an auth error).
+
+**Overrides** flow through `other_args`: `github_token`, `copilot_token`, `base_url`,
+`editor_version`, `default_headers`, `auto_login`.
+
+**Auto device login**: when no auth is found the provider can run a one-time device-flow login
+instead of raising. Resolution order: `other_args["auto_login"]` > the
+`ANDROMEDA_COPILOT_AUTO_LOGIN` env var (`1`/`true`/`yes`/`on`) > interactive-terminal
+autodetect (on only when stdin and stdout are a TTY). It fires only when nothing else resolves.
+
+**Relevant env vars**: `GITHUB_COPILOT_TOKEN` / `COPILOT_API_KEY` (ready token),
+`GITHUB_TOKEN` / `GH_TOKEN` (exchangeable), `GITHUB_COPILOT_EDITOR_VERSION`,
+`ANDROMEDA_COPILOT_AUTO_LOGIN`.
+
+**Helpers** in `andromeda.utils.github_copilot`:
+- `device_login()` — one-time device-flow auth for headless/remote use.
+- `print_models(chat_only=False)` — readable, grouped table of available models.
+- `list_models(chat_only=True)` — raw model dicts for programmatic use.
+- `get_copilot_limits()` — plan, chat-enabled flag, quota snapshots / reset date.
+
+### 2.4. ChatGPT/Codex provider (`provider="openai_codex"`)
+
+Use an existing **ChatGPT subscription** (Plus/Pro/Team) as a chat provider via OAuth against
+OpenAI's Codex backend (`https://chatgpt.com/backend-api/codex`) — no `OPENAI_API_KEY` needed.
+Requires the optional extra: `pip install "andromeda[openai-codex]"` (needs
+`langchain-openai>=1.3.1`).
+
+Implemented in `andromeda.utils.openai_codex` as `ChatOpenAICodex`, a real `ChatOpenAI`
+subclass (Responses API) wrapping `langchain_openai`'s experimental `_ChatOpenAICodex` /
+`chatgpt_oauth`. Because it's an ordinary `ChatOpenAI`, native tool calling,
+`with_structured_output`, streaming and async all work unchanged. There is no embeddings
+counterpart. This integration is unofficial/experimental upstream.
+
+```python
+from andromeda.config import ModelConfig
+from andromeda.utils.langtils import get_chat_model
+from andromeda.utils.openai_codex import print_models
+
+# No explicit sign-in needed: constructing the model below runs the
+# device-code flow automatically if you aren't signed in yet (interactive
+# terminal only — see auto_login).
+model = get_chat_model(ModelConfig(provider="openai_codex", name="gpt-5.5"))
+print(model.invoke("Hello!").content)
+
+print_models()  # see what your plan allows
+```
+
+**Model names must be Codex slugs** (e.g. `gpt-5.5`, `gpt-5.4-mini`); ordinary API names like
+`gpt-4` are rejected with `"The '<model>' model is not supported when using Codex with a
+ChatGPT account."`. Available slugs depend on your ChatGPT plan — discover them with print_models() instead of
+guessing.
+
+**Authentication**: OAuth 2.0 device-code flow (prints a verification URL + short code to enter
+on any device — no local browser/callback port needed), token stored at
+`~/.langchain/chatgpt-auth.json` (deliberately separate from the Codex CLI's `~/.codex/auth.json`
+so refresh rotation here never invalidates that session) and refreshed automatically. There is no
+browser-loopback `login()` — `login_device()` is the only sign-in flow.
+
+**Automatic sign-in**: with no token on disk, `ChatOpenAICodex.__init__` runs `login_device()` for
+you. `auto_login` resolution order: `other_args["auto_login"]` > the
+`ANDROMEDA_CODEX_AUTO_LOGIN` env var (`1`/`true`/`yes`/`on`) > interactive-terminal autodetect
+(on only when stdin *and* stdout are a TTY, so it never blocks CI/daemons/tests). A caller-supplied
+`token_provider` object opts out of this entirely.
+
+**Overrides** flow through `other_args`: `instructions` (default system prompt — `SystemMessage`
+content is auto-lifted into it, since Codex rejects system-role chat turns), `token_store_path`
+(alternate token file), `reasoning` (e.g. `{"effort": "high"}`), `originator` (telemetry header,
+defaults to `"andromeda"`, overridable via `LANGCHAIN_CODEX_ORIGINATOR`), `auto_login` (force
+automatic sign-in on/off). `api_key` / `base_url` are rejected — auth is OAuth-managed only.
+
+**Helpers** in `andromeda.utils.openai_codex`:
+- `login_device()` — device-code OAuth sign-in (prints a URL + code; also called automatically).
+- `logged_in()` / `auth_status()` — check sign-in state, plan, token expiry.
+- `list_models()` / `print_models(show_hidden=False)` — raw dicts / readable table of Codex
+  model slugs, context window, reasoning efforts, and per-plan availability.
+
+---
+
+## 3. Agent, Supervisor, and Team Abstractions
+
+The core runtime abstractions live in `andromeda.core`:
+
+- `Agent` (`andromeda.core.agent.Agent`)
+- `Supervisor` (`andromeda.core.supervisor.Supervisor`)
+- `Team` (`andromeda.core.team.Team`)
+
+Configuration models are in `andromeda.config`:
+
+- `AgentConfig`
+- `SupervisorConfig`
+- `PlannerConfig`
+- `ReportConfig`
+- `AndromedaConfig`
+
+The high-level data-flow for a `Team` is:
+
+```text
+User Input
+  ↓
+Team.begin() / Team.abegin()
+  ↓
+PlannerAgent.plan_of_action()   → produces / updates a plan
+  ↓
+Supervisor.supervise()          → routes work to specialist Agents via tools
+  ↓
+optional ReportWriter.report_generator() → final report in state["report_output"]
+```
+
+---
+
+### 3.1. `Agent` class
+
+**Location**: `andromeda/core/agent.py`  
+**Purpose**: Wrap a LangGraph ReAct or CodeAct agent and expose a uniform API for:
+
+- Single-turn invocation (`invoke`, `ainvoke`)
+- Streaming (`stream`, `astream`, `astream_structured_events`)
+- Convenience entrypoints: `chat`, `task`, `research`, `handoff`, `aresearch`, etc.
+
+#### 3.1.1. Key configuration: `AgentConfig`
+
+From `andromeda.config`:
+
+```python
+from typing import Callable, List, Optional, Union, Dict, Any, Type
+from pydantic import BaseModel, Field
+from langchain.tools import BaseTool
+from andromeda.config import MiddlewareConfig
+
+class AgentConfig(BaseModel):
+    name: str
+    model: Union[ModelConfig, str]
+    tools: List[BaseTool] = Field(default_factory=list)
+    prompt: Optional[str] = Field(default="")
+    response_format: Optional[Union[Type[BaseModel], Dict, None]] = Field(default=None)
+    debug: int = Field(default=0)       # 0: none, 1: I/O, 2: deep trace, 3: LangGraph debug
+    recursion_limit: Optional[int] = Field(default=25)
+    validation: ValidationConfig = Field(default_factory=ValidationConfig)
+    citations: CitationConfig = Field(default_factory=CitationConfig)
+    return_direct: bool = Field(default=True)
+    next: Optional[str] = Field(default=None)
+    type: Literal["react", "codeact"] = Field(default="react")
+    state_schema: Optional[Any] = Field(default=None)
+    middleware: MiddlewareConfig = Field(default_factory=MiddlewareConfig)
+```
+
+**Semantics:**
+
+- `name`: Used as the agent’s logical identifier and in logs.
+- `model`: Either a `ModelConfig` instance or a **string** model name.
+- `tools`: List of LangChain/Andromeda tools (callables decorated with `@tool`).
+- `prompt`: System prompt passed to the agent. In v1, this is passed as `system_prompt` parameter to `langchain.agents.create_agent`.
+- `response_format`: Optional Pydantic model or TypedDict for structured output. In v1, this is wrapped in `ToolStrategy` or `ProviderStrategy`.
+- `state_schema`: Optional custom agent state schema (TypedDict extending `AgentState`) passed to `create_agent`.
+- `middleware`: Optional middleware config. Middleware activation is inferred from configured blocks (or forced off with `enabled=False`), and supports custom wrappers.
+- `debug`:
+  - `0`: No tracing.
+  - `1`: Log input/output messages via `log_agent`.
+  - `2`: Wraps methods via `pyeztrace.tracer.trace` for deep tracing.
+  - `3`: Enables LangGraph’s debug mode on compiled graphs.
+- `type`:
+  - `"react"`: Uses `langchain.agents.create_agent(...)` (v1 API).
+  - `"codeact"`: Uses `langgraph_codeact.create_codeact(...).compile(...)` if installed.
+
+#### 3.1.2. Agent initialization and ReAct/CodeAct selection
+
+Internally, `Agent.__init__`:
+
+1. Converts `agent_config.model` into a `BaseChatModel` via `get_chat_model`.
+2. Builds a ReAct or CodeAct graph.
+3. Optionally wraps public methods with tracing when `debug == 2`.
+4. Creates an internal `WorkflowBuilder` that simply calls `_invoke_agent_step`.
+
+#### 3.1.3. Core invocation pattern
+
+All high-level methods (`invoke`, `stream`, `chat`, `task`, etc.) eventually call an internal workflow that:
+
+1. Wraps input messages in `{"messages": messages, "config": ...}`.
+2. Calls `self.workflow.execute(...)`.
+3. Stores messages in `self.memory` depending on `remember` ("all", "last", "none").
+
+**Canonical usage example:**
+
+```python
+from andromeda.config import AgentConfig, ModelConfig
+from andromeda.core.agent import Agent
+from andromeda import HumanMessage
+
+research_agent_config = AgentConfig(
+    name="researcher",
+    model=ModelConfig(name="llama3.1:8b", provider="ollama"),
+    tools=[],  # can add tools here
+    prompt="You are a careful research assistant.",
+    middleware=MiddlewareConfig(
+        tool_error_handler=True,
+        summarization=MiddlewareConfig.SummarizationOptions(trigger_tokens=1200),
+        masking=MiddlewareConfig.MaskingOptions(
+            output=True,
+            strategy="tokenize",
+            token_prefix="pii",
+            token_ttl_seconds=86400,
+        ),
+    ),
+    type="react",
+)
+
+research_agent = Agent(research_agent_config)
+
+messages = [HumanMessage(content="Give me 3 bullet points about transformers in NLP.")]
+response_messages = research_agent.invoke(messages)
+```
+
+For `masking.strategy="tokenize"`, set one of:
+
+```bash
+export ANDROMEDA_ENCRYPTION_KEY="<fernet_key>"
+# or
+export ANDROMEDA_ENCRYPTION_SECRET="<strong_secret>"
+```
+
+#### 3.1.4. Specialized helpers (`chat`, `task`, `research`)
+
+- `chat(message: str) -> List[BaseMessage]`:
+  - Treats `self.memory` as conversation history.
+  - Appends `HumanMessage(content=message)`.
+  - Returns the output messages.
+- `task(task: str)`:
+  - Uses a goal-oriented system prompt to run a **task mode** workflow.
+  - Returns the last message content as a string.
+- `research(task: str)`:
+  - Similar to `task` but emphasizes research behavior.
+
+Example:
+
+```python
+summary = research_agent.task("Analyze the competitive landscape for open-source LLM orchestration tools.")
+```
+
+#### 3.1.5. Handoff to supervisor
+
+The `handoff` method returns a `Command` instructing the outer Team graph to transfer control to a `"supervisor"` node:
+
+```python
+from langgraph.types import Command
+
+def handoff(self, messages: List[BaseMessage]) -> Command:
+    result = self._run_workflow(messages, remember="none")
+    return Command(goto="supervisor", state=result.get("state"))
+```
+
+---
+
+### 3.2. `Supervisor` class
+
+**Location**: `andromeda/core/supervisor.py`  
+**Purpose**: Orchestrate multiple specialist `Agent` instances, optionally maintaining and enforcing a **plan of action**.
+
+The `Supervisor` **inherits from `Agent`**, but:
+
+- It dynamically constructs additional **tools** for:
+  - Routing work to a named agent.
+  - Managing and inspecting a plan (`get_current_plan`, `mark_plan_item_complete`, `generate_new_plan`) when planning is enabled.
+- It rewrites its own `prompt` to a supervisor-specific routing prompt.
+
+#### 3.2.1. Configuration: `SupervisorConfig`
+
+From `andromeda.config`:
+
+```python
+class SupervisorConfig(AgentConfig):
+    name: str = Field(default="supervisor")
+    recursion_limit: Optional[int] = Field(default=30)
+    type: Literal["react"] = Field(default="react")
+    enable_planning: bool = Field(default=True)
+    planner: Optional[PlannerConfig] = None
+```
+
+#### 3.2.2. Supervisor tools
+
+`Supervisor.make_supervisor_tools` builds several tools by default:
+
+1. **`route_to_agent`**:
+
+```python
+@tool
+def route_to_agent(
+    agent_name: str,
+    prompt: str,
+    invocation_type: Literal["chat", "task", "research", "handoff"],
+) -> str:
+    # routes to named Agent and calls .chat(), .task(), .research(), or .handoff()
+```
+
+2. If `required_plan` (`enable_planning`) is `True`:
+
+   - `get_current_plan() -> Dict[str, Dict[str, str]]`
+   - `mark_plan_item_complete(plan_id: str) -> str`
+   - `generate_new_plan(reason: str) -> str` (internally creates a `PlannerAgent` and updates `self.plan`).
+
+The plan is stored as an ordered dict with `{"status": "pending" | "complete", "item": "...description..."}`.
+
+#### 3.2.3. `supervise(state: dict) -> dict`
+
+Core orchestration loop:
+
+1. Syncs `self.plan` from `state["plan"]`.
+2. Optionally injects plan context messages when a plan exists.
+3. Calls `self.invoke(messages)` to let the supervisor model:
+   - Decide whether to respond directly.
+   - Or call tools such as `route_to_agent` / plan tools.
+4. Returns `{"messages": response_messages, "plan": self.plan}`.
+5. If planning is enabled and there are pending plan items, may re-prompt the model up to `validation.skip_after_attempts` times.
+
+---
+
+### 3.3. `Team` class – End-to-end orchestration
+
+**Location**: `andromeda/core/team.py`  
+**Purpose**: Provide a **single entrypoint** that:
+
+- Instantiates agents and supervisor from `AndromedaConfig`.
+- Wires together:
+  - `PlannerAgent` (for plan-of-action generation).
+  - `Supervisor` (for routing and coordination).
+  - Optional `ReportWriter` (for generating final reports).
+- Exposes simple entry methods:
+  - `begin(user_message: str)`
+  - `abegin(user_message: str)`
+
+#### 3.3.1. Configuration: `AndromedaConfig`
+
+From `andromeda.config`:
+
+```python
+class AndromedaConfig(BaseModel):
+    agents: Union[Dict[str, Union[AgentConfig, Any]], List[AgentConfig]]
+    supervisor: SupervisorConfig = Field(default_factory=SupervisorConfig)
+    planner: PlannerConfig = Field(default_factory=PlannerConfig)
+    report: ReportConfig = Field(default_factory=ReportConfig)
+```
+
+#### 3.3.2. Team initialization and workflow
+
+`Team.__init__`:
+
+- Normalizes `agents` to a list.
+- Forces `config.supervisor.enable_planning = True`.
+- Constructs:
+  - `self.supervisor = Supervisor(agents=agent_list, config=config.supervisor)`
+  - `self.planner = PlannerAgent(config=config.planner)`
+  - Optional `self.report_writer = ReportWriter(...)` when `report.enabled` is `True`.
+- Builds a simple workflow:
+
+```python
+def _build_workflow(self) -> WorkflowBuilder:
+    workflow = WorkflowBuilder(name="TeamWorkflow")
+    chain = (
+        workflow.start("planner")
+            .run(self._planner_step)
+        .then("supervisor")
+            .run(self._supervisor_step)
+    )
+    if self.report_writer is not None:
+        chain = chain.then("report_writer").run(self._report_writer_step)
+    return workflow
+```
+
+Each step merges updates into state using `_merge_state`, preserving `"messages"`, `"plan"`, and `"report_output"` where relevant.
+
+#### 3.3.3. Entry methods: `begin` and `abegin`
+
+```python
+def begin(self, user_message: str) -> Dict[str, Any] | Any:
+    initial_state = {
+        "messages": [HumanMessage(content=user_message)],
+        "plan": [],
+        "report_output": None,
+    }
+    result = self.workflow.execute(state=initial_state)
+    return result if isinstance(result, dict) else initial_state
+```
+
+Async variant `abegin` uses `aexecute` but has the same initial state shape.
+
+#### 3.3.4. Example: Full team configuration and usage
+
+```python
+from andromeda.config import (
+    AndromedaConfig,
+    AgentConfig,
+    SupervisorConfig,
+    PlannerConfig,
+    ReportConfig,
+    ModelConfig,
+    ValidationConfig,
+    CitationConfig,
+)
+from andromeda.core.team import Team
+from andromeda.tools.tools import web_search, news_search
+
+research_model = ModelConfig(
+    name="llama3.1:8b",
+    provider="litellm",
+    other_args={"base_url": "http://localhost:11434"},
+)
+
+finance_agent = AgentConfig(
+    name="finance_analyst",
+    model=research_model,
+    tools=[news_search],
+    prompt="You are a financial analyst focusing on company fundamentals.",
+)
+
+market_agent = AgentConfig(
+    name="market_analyst",
+    model=research_model,
+    tools=[web_search, news_search],
+    prompt="You are a market research analyst focusing on industry trends.",
+)
+
+supervisor_cfg = SupervisorConfig(
+    model=research_model,
+    prompt="You are a research supervisor coordinating finance and market analysts.",
+    enable_planning=True,
+    validation=ValidationConfig(enabled=True, min_sufficiency_score=0.8),
+)
+
+planner_cfg = PlannerConfig(
+    model=research_model,
+    task_type="research",
+    report_structure="Introduction, Current Landscape, Key Players, Risks, Conclusion",
+)
+
+report_cfg = ReportConfig(
+    enabled=True,
+    model=research_model,
+    format="markdown",
+    citations=CitationConfig(required=True, min_density=0.2),
+    validation=ValidationConfig(
+        enabled=True,
+        min_sufficiency_score=0.8,
+        model=research_model,
+    ),
+    output_mode="state",
+)
+
+config = AndromedaConfig(
+    agents={"finance": finance_agent, "market": market_agent},
+    supervisor=supervisor_cfg,
+    planner=planner_cfg,
+    report=report_cfg,
+)
+
+team = Team(config)
+result_state = team.begin("Analyze the impact of AI chip shortages on cloud providers.")
+
+final_messages = result_state["messages"]
+plan_snapshot = result_state["plan"]
+report_markdown = result_state.get("report_output")
+```
+
+---
+
+## 4. Environment and Dependencies (for context)
+
+- Python 3.11+
+- Andromeda depends on:
+  - LangGraph (graphs and execution).
+  - LangChain (chat models, tools, embeddings).
+  - Provider-specific LangChain integration packages (e.g. `langchain-ollama`, `langchain-openai`, `langchain-aws`, etc.).
+
+Typical installation:
+
+```bash
+pip install git+https://github.com/AI-Emerging-Tech/ET-Agentify.git
+```
+
+Environment variables commonly used (depending on providers):
+
+```bash
+TAVILY_API_KEY=your_tavily_api_key_here
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+---
+
+## 5. Tool Registry System
+
+Andromeda includes a global tool registry (`andromeda.tools.toolkit`) that allows tools to be referenced by name in configuration files. This enables clean separation between tool definitions and configuration.
+
+### 5.1. Built-in Tools
+
+Built-in tools are automatically registered when `andromeda.tools.tools` is imported:
+
+```python
+from andromeda.tools.tools import (
+    web_search,
+    news_search,
+)
+# These tools are automatically registered with the global Toolkit
+```
+
+Available built-in tools:
+- `web_search`: General web search using Tavily
+- `news_search`: News-specific search
+
+### 5.2. Using Tools by Name in Configuration
+
+When loading configuration from YAML, string tool names are automatically resolved to `BaseTool` instances:
+
+**config.yaml:**
+```yaml
+agents:
+  researcher:
+    name: researcher
+    model:
+      name: llama3.1:8b
+      provider: litellm
+    tools:
+      - web_search          # String name resolved to tool instance
+      - news_search
+```
+
+**Python code:**
+```python
+from andromeda.config import AndromedaConfig
+# Import built-in tools to register them
+import andromeda.tools.tools  # noqa: F401
+
+config = AndromedaConfig.load_from_file("config.yaml")
+# config.agents["researcher"].tools now contains actual BaseTool instances
+```
+
+### 5.3. Registering Custom Tools
+
+To use custom tools by name in configuration files, register them before loading:
+
+```python
+from andromeda.tools import tool
+from andromeda.tools.toolkit import register_tool, register_tools
+
+@tool
+def custom_analyzer(data: str) -> str:
+    """Custom analysis tool."""
+    return f"Analyzed: {data}"
+
+# Register a single tool
+register_tool(custom_analyzer)
+
+# Or register multiple tools at once
+register_tools([tool1, tool2, tool3])
+
+# Now use in config.yaml:
+# tools:
+#   - custom_analyzer
+```
+
+### 5.4. Tool Registry API
+
+The `Toolkit` class provides the core registry functionality:
+
+```python
+from andromeda.tools.toolkit import Toolkit, get_default_toolkit, resolve_tool_spec
+
+# Get the default global registry
+toolkit = get_default_toolkit()
+
+# Check if a tool is registered
+if toolkit.has("web_search"):
+    tool = toolkit.get("web_search")
+
+# Resolve a tool spec (string name or BaseTool instance)
+tool = resolve_tool_spec("web_search")  # Returns BaseTool instance
+tool = resolve_tool_spec(existing_tool)      # Returns instance as-is
+```
+
+**Key functions:**
+- `register_tool(tool, *, name=None, override=False)`: Register a single tool
+- `register_tools(tools)`: Register multiple tools
+- `resolve_tool_spec(spec)`: Resolve string name or tool instance to `BaseTool`
+- `get_default_toolkit()`: Get the global registry instance
+
+### 5.5. Tool Resolution in Config Loading
+
+When `AndromedaConfig.load_from_file()` processes a YAML file:
+
+1. Built-in tools are imported and auto-registered (if not already registered)
+2. String tool names in `agents[].tools` and `supervisor.tools` are resolved via `resolve_tool_spec()`
+3. Unknown tool names raise a `ValueError` with a helpful error message
+4. Tool instances are replaced in the config data before Pydantic validation
+
+This allows configuration files to be clean and readable while maintaining type safety and runtime tool availability.
+
+---
+
+LLMs reading this file should treat it as the **canonical reference** for:
+
+- How to build workflows (`WorkflowBuilder`, `WorkflowExpression`, `task`, `conditional`, `parallel`).
+- How to obtain chat models (`ModelConfig`, `get_chat_model`).
+- How to configure and use `Agent`, `Supervisor`, and `Team` to build multi-agent research and analysis systems.
+- How to use the tool registry system to reference tools by name in configuration files.
+
+### 5.6. Using MCP servers in configuration
+
+```yaml
+# example configuration for a GitHub MCP server and a LangGraph MCP server
+agents:
+  - name: github_agent
+    model:
+      name: qwen3:8b
+      provider: litellm
+    tools:
+      - github.get_issue
+      - langgraph-docs-mcp.list_doc_sources
+mcp_servers:
+  - github:
+      transport: http
+      url: https://api.githubcopilot.com/mcp/
+      authorization: Bearer <token>
+  - langgraph-docs-mcp:
+      transport: stdio
+      command: uvx
+      args: ["--from", "mcpdoc", "mcpdoc", "--urls", "LangGraph:https://langchain-ai.github.io/langgraph/llms.txt LangChain:https://python.langchain.com/llms.txt", "--transport", "stdio"]
+```
+
+**Python code:**
+```python
+from andromeda.config import AndromedaConfig
+# Import built-in tools to register them
+import andromeda.tools.tools  # noqa: F401
+
+config = AndromedaConfig.load_from_file("config.yaml")
+# config.agents["github_agent"].tools now contains actual BaseTool instances
+```
+
+### 5.7. Using MCP servers for long-lived sessions
+
+```python
+from andromeda.tools.mcp_adapter import open_mcp_sessions, load_from_sessions
+from andromeda.config import AgentConfig, ModelConfig
+from andromeda.core.agent import Agent
+
+mcp_cfg = {
+    "github": {"transport": "http", "url": "https://api.githubcopilot.com/mcp/", "authorization": "Bearer <token>"},
+    "langgraph-docs-mcp": {"transport": "stdio", "command": "uvx", "args": ["--from", "mcpdoc", "mcpdoc", "--urls", "LangGraph:https://langchain-ai.github.io/langgraph/llms.txt LangChain:https://python.langchain.com/llms.txt", "--transport", "stdio"]}
+}
+async with open_mcp_sessions(mcp_cfg) as sessions:
+    tools = await load_from_sessions(sessions)
+    agent = Agent(
+        AgentConfig(
+            name="github_tool_agent",
+            model=ModelConfig(name="qwen3:8b", provider="litellm"),
+            tools=tools
+        )
+    )
+    result = agent.invoke([HumanMessage(content="Get GitHub issue for langchain-ai/langgraph, #123")])
+    # tools now contains the MCP tools
+```
+
+### 5.8. Long-lived sessions vs short-lived sessions
+
+register_mcp opens short-lived sessions for each tool call.
+open_mcp_sessions opens long-lived sessions for the duration of the workflow or team run.
+
+## 6. Langfuse Tracing & Scoring (Optional)
+
+Andromeda can integrate with Langfuse for tracing and for ingesting custom scores via the Langfuse SDK.
+
+### 6.1. Trace IDs
+
+- Langfuse can use random trace IDs by default.
+- Andromeda derives a deterministic Langfuse trace ID from the workflow ``thread_id`` and uses it consistently for:
+  - Langfuse tracing (via the LangChain callback handler)
+  - Langfuse scoring (via ``create_score``)
+- This enables correlation across services and ensures scores show on the same trace.
+
+### 6.2. Trace input/output
+
+The root workflow span (``workflow:<name>``) updates the Langfuse trace with the full workflow input and output state
+using ``update_trace(input=..., output=...)`` (best-effort serialization).
+
+### 6.3. Per-node evaluation (scoring)
+
+Attach evaluators to nodes using ``with_evaluators``. Evaluators run in the background and do not block workflow execution.
+
+- Built-in evaluators: ``correctness``, ``hallucination``, ``relevance``, ``tool_usage``
+- Sampling: per-evaluator ``sample_rate`` (e.g. 0.5 runs ~50% of the time)
+- IO presets: evaluators can consume presets like ``first_message``, ``last_message``, ``all_messages``, ``tools_called``, ``tool_results``, ``trajectory``
+- Score naming: scores are auto-scoped by step name (e.g. ``refine:correctness``)
+
+Example:
+
+```python
+from andromeda.core.workflow import WorkflowBuilder, correctness
+
+wf = WorkflowBuilder(name="EvalExample")
+(
+  wf.start("refine")
+    .run(lambda s: s)
+    .with_evaluators(
+      [correctness(sample_rate=1.0)],
+      scheduler={"max_workers": 2, "max_pending": 128},
+      model={"name": "gpt-oss:20b", "provider": "litellm", "temperature": 0.0, "other_args": {"base_url": "http://localhost:11434"}},
+    )
+)
+```

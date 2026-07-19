@@ -1,0 +1,48 @@
+/* Custom styling tweaks for Andromeda docs */
+
+/* Improve the visual grouping of the main index ToC */
+.toctree-wrapper {
+  padding: 0.75rem 0;
+  margin: 0.5rem 0 1rem;
+  border: 0;
+  background: transparent;
+}
+
+/* Compact list spacing inside the index toctree */
+.toctree-wrapper > ul {
+  /* use normal list styling for better hierarchy */
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.25rem 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.toctree-wrapper > ul > li {
+  margin: 0.25rem 0;
+  font-size: 1rem;
+}
+
+.toctree-wrapper > ul > li > a {
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1.6;
+}
+
+.toctree-wrapper > ul > li > a:hover {
+  text-decoration: dotted;
+}
+
+.toctree-wrapper ul ul {
+  margin-left: 1.1rem;
+  margin-top: 0.15rem;
+  font-size: 0.98rem;
+}
+
+/* Target Awesome Theme’s toctree levels if present */
+.toctree-l1 > a { font-size: 1.08rem; font-weight: 600; }
+.toctree-l2 > a { font-size: 0.98rem; font-weight: 500; }
+.toctree-l3 > a { font-size: 0.95rem; font-weight: 500; }
+
+/* Fine-tune nested list spacing */
+.toctree-wrapper ul li { margin: 0.5rem 0 !important; }
+.toctree-wrapper ul ul li { margin: 0.4rem 0 !important; }

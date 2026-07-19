@@ -1,0 +1,52 @@
+# This workflow lives on the `docs` branch (built Sphinx HTML, published by the
+# "Deploy Docs" workflow on main). It syncs that static HTML to S3.
+#
+# It is injected into the published output by the main workflow so it survives
+# force_orphan. For the push from main to TRIGGER this workflow, main must push
+# with a deploy key/PAT — a GITHUB_TOKEN push does NOT trigger downstream runs.
+#
+# Required repo configuration (Settings > Secrets and variables > Actions):
+#   vars.DOCS_DEPLOY_ROLE_ARN          IAM role with S3 (+ CloudFront) perms,
+#                                      trust policy must permit branch `docs`.
+#                                      Do NOT reuse github-actions-codeartifact-publish
+#                                      (CodeArtifact-scoped, wrong permissions/trust).
+#   vars.DOCS_S3_BUCKET                Target S3 bucket name.
+#   vars.DOCS_CLOUDFRONT_DISTRIBUTION_ID  (optional) CloudFront distribution to invalidate.
+name: Deploy Docs to S3
+
+on:
+  push:
+    branches:
+      - docs
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # required for OIDC
+  contents: read
+
+jobs:
+  deploy-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout docs branch
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.DOCS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync static docs to S3
+        run: |
+          aws s3 sync . "s3://${{ vars.DOCS_S3_BUCKET }}" \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*"
+
+      - name: Invalidate CloudFront cache
+        if: ${{ vars.DOCS_CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.DOCS_CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*"

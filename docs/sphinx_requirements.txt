@@ -1,0 +1,13 @@
+sphinx
+sphinx-copybutton
+sphinx-autobuild
+sphinx-book-theme
+sphinx-rtd-theme
+furo
+pytest
+pytest-cov
+beautifulsoup4
+docopt == 0.6.1
+requests [security] >= 2.8.1, == 2.8.* ; python_version < "2.7"
+urllib3 @ https://github.com/urllib3/urllib3/archive/refs/tags/1.26.8.zip
+shibuya
