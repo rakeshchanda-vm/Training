@@ -1,11 +1,11 @@
-# from andromeda.config import ModelConfig
-# from andromeda.utils import get_chat_model
+    # from andromeda.config import ModelConfig
+    # from andromeda.utils import get_chat_model
 
-# llm = get_chat_model(model_config=ModelConfig(name='llama3.2:3b',provider='ollama', output_version='v1',
-#                                               temperature=0))
+    # llm = get_chat_model(model_config=ModelConfig(name='llama3.2:3b',provider='ollama', output_version='v1',
+    #                                               temperature=0))
 
-# response = llm.invoke("Give me multiplication table of 25 upto 10 iterations")
-# print(response.text)
+    # response = llm.invoke("Give me multiplication table of 25 upto 10 iterations")
+    # print(response.text)
 
 #################################################################################################################
 
