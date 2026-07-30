@@ -1,0 +1,93 @@
+{
+  "by_policy_year": {
+    "06/01/2023 - 06/01/2024": {
+      "carrier_name": "Meridian Mutual Insurance Company",
+      "premium": 48500.0,
+      "claim_count": 6,
+      "total_incurred": 218851.09,
+      "loss_ratio_pct": 451.2,
+      "avg_severity": 36475.18,
+      "open_claim_count": 2,
+      "pct_claims_open": 33.3,
+      "reserve_share_of_incurred_pct": 8.5
+    },
+    "06/01/2021 - 06/01/2022": {
+      "carrier_name": "Summit Underwriters Exchange",
+      "premium": 39800.0,
+      "claim_count": 8,
+      "total_incurred": 326177.04,
+      "loss_ratio_pct": 819.5,
+      "avg_severity": 40772.13,
+      "open_claim_count": 0,
+      "pct_claims_open": 0.0,
+      "reserve_share_of_incurred_pct": 8.7
+    },
+    "06/01/2022 - 06/01/2023": {
+      "carrier_name": "Continental Assurance Group",
+      "premium": 44200.0,
+      "claim_count": 5,
+      "total_incurred": 382355.74,
+      "loss_ratio_pct": 865.1,
+      "avg_severity": 76471.15,
+      "open_claim_count": 2,
+      "pct_claims_open": 40.0,
+      "reserve_share_of_incurred_pct": 5.9
+    },
+    "06/01/2020 - 06/01/2021": {
+      "carrier_name": "Pinnacle Casualty & Surety Co.",
+      "premium": 36500.0,
+      "claim_count": 5,
+      "total_incurred": 680948.35,
+      "loss_ratio_pct": 1865.6,
+      "avg_severity": 136189.67,
+      "open_claim_count": 0,
+      "pct_claims_open": 0.0,
+      "reserve_share_of_incurred_pct": 18.7
+    }
+  },
+  "aggregate": {
+    "total_premium": 169000.0,
+    "total_incurred": 1608332.22,
+    "overall_loss_ratio_pct": 951.7,
+    "total_claim_count": 24,
+    "avg_claims_per_year": 6.0
+  },
+  "trend": {
+    "oldest_year": "06/01/2020 - 06/01/2021",
+    "oldest_year_loss_ratio_pct": 1865.6,
+    "newest_year": "06/01/2023 - 06/01/2024",
+    "newest_year_loss_ratio_pct": 451.2,
+    "direction": "improving"
+  },
+  "open_exposure": {
+    "open_claim_count": 4,
+    "total_outstanding_reserve": 41136.49
+  },
+  "large_losses": [],
+  "top_causes_of_loss": [
+    {
+      "cause": "",
+      "count": 6
+    },
+    {
+      "cause": "IL",
+      "count": 4
+    },
+    {
+      "cause": "Premises Liability - p",
+      "count": 2
+    },
+    {
+      "cause": "Water damage - burst p",
+      "count": 2
+    },
+    {
+      "cause": "GA",
+      "count": 1
+    }
+  ],
+  "maturity_caveats": [
+    "06/01/2023 - 06/01/2024: 33.3% of claims remain open.",
+    "06/01/2022 - 06/01/2023: 40.0% of claims remain open."
+  ]
+}

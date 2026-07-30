@@ -1,0 +1,79 @@
+{
+  "source_file": "04_Pinnacle_Casualty_LossRun_Scanned.pdf.md",
+  "insured_name": "Ironbridge Logistics, LLC",
+  "carrier_name": "Pinnacle Casualty & Surety Co.",
+  "policy_number": "WC-77290143-03",
+  "policy_start": "06/01/2020",
+  "policy_end": "06/01/2021",
+  "annual_premium": 36500.0,
+  "per_occurrence_limit": 1000000.0,
+  "aggregate_limit": 2000000.0,
+  "deductible": 2500.0,
+  "claims": [
+    {
+      "claim_number": "CL-2024-0031",
+      "loss_date": "02/22/21",
+      "status": "Clos",
+      "cause_of_loss": "Slip and fall - wet fl",
+      "state": "OH",
+      "paid_loss": 42374.0,
+      "paid_expense": 0.0,
+      "reserve": 48403.0,
+      "total_incurred": 136189.67,
+      "subrogation": 0.0,
+      "cat_indicator": false
+    },
+    {
+      "claim_number": "CL-2022-0035",
+      "loss_date": "10/10/20",
+      "status": "Clos",
+      "cause_of_loss": "Premises Liability - p",
+      "state": "PA",
+      "paid_loss": 3271.0,
+      "paid_expense": 0.0,
+      "reserve": 3432.0,
+      "total_incurred": 136189.67,
+      "subrogation": 0.0,
+      "cat_indicator": false
+    },
+    {
+      "claim_number": "CL-2025-0038",
+      "loss_date": "12/07/20",
+      "status": "Reop",
+      "cause_of_loss": "Water damage - burst p",
+      "state": "OH",
+      "paid_loss": 42475.0,
+      "paid_expense": 22897.0,
+      "reserve": 67174.0,
+      "total_incurred": 136189.67,
+      "subrogation": 0.0,
+      "cat_indicator": false
+    },
+    {
+      "claim_number": "CL-2023-0041",
+      "loss_date": "02/10/21",
+      "status": "Clos",
+      "cause_of_loss": "Water damage - burst p",
+      "state": "FL",
+      "paid_loss": 5533.0,
+      "paid_expense": 0.0,
+      "reserve": 7695.0,
+      "total_incurred": 136189.67,
+      "subrogation": 0.0,
+      "cat_indicator": false
+    },
+    {
+      "claim_number": "CL-2024-0031",
+      "loss_date": "02/22/21",
+      "status": "Clos",
+      "cause_of_loss": "Premises Liability - p",
+      "state": "OH",
+      "paid_loss": 8374.0,
+      "paid_expense": 0.0,
+      "reserve": 965.4,
+      "total_incurred": 136189.67,
+      "subrogation": 0.0,
+      "cat_indicator": false
+    }
+  ]
+}
