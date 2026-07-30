@@ -11,13 +11,13 @@ import uuid
 
 from pydantic import BaseModel, Field
 
-from andromeda.tools import tool, BaseTool
+from CodingLive.andromeda.tools import tool, BaseTool
 
-from andromeda.config.config import AgentConfig, SupervisorConfig
-from andromeda.core.agent import Agent
-from andromeda import HumanMessage, AIMessage
-from andromeda.utils.logger import log_supervisor
-from andromeda.utils.prompts import supervisor_task_routing_prompt_v2
+from CodingLive.andromeda.config.config import AgentConfig, SupervisorConfig
+from CodingLive.andromeda.core.agent import Agent
+from CodingLive.andromeda import HumanMessage, AIMessage
+from CodingLive.andromeda.utils.logger import log_supervisor
+from CodingLive.andromeda.utils.prompts import supervisor_task_routing_prompt_v2
 
 
 _ASYNC_TASK_SCOPE: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
@@ -363,7 +363,7 @@ class Supervisor(Agent):
             results: List[Optional[str]] = [None] * len(normalized_tasks)
             # Execute tasks in parallel (threaded).
             import concurrent.futures
-            from andromeda.core.workflow.eval_scheduler import get_safe_process_count
+            from CodingLive.andromeda.core.workflow.eval_scheduler import get_safe_process_count
 
             thread_id = self._current_thread_id()
             metadata = self._current_metadata()

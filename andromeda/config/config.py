@@ -5,7 +5,7 @@ from langchain.tools import BaseTool
 from langchain.agents import AgentState
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
-from andromeda.config.yaml_utils import yaml_dump, yaml_load
+from CodingLive.andromeda.config.yaml_utils import yaml_dump, yaml_load
 
 
 def _normalize_config_object(
@@ -48,7 +48,7 @@ def _normalize_config_object(
         if execution_context is None and effective_mcp_runtime is None:
             return None
 
-        from andromeda.tools.toolkit import Toolkit, get_default_toolkit
+        from CodingLive.andromeda.tools.toolkit import Toolkit, get_default_toolkit
 
         effective_toolkit = Toolkit(parent=get_default_toolkit())
         if execution_context is not None:
@@ -59,7 +59,7 @@ def _normalize_config_object(
         if effective_toolkit is None:
             return None
 
-        from andromeda.tools.toolkit import Toolkit, get_default_toolkit
+        from CodingLive.andromeda.tools.toolkit import Toolkit, get_default_toolkit
 
         layered_toolkit = Toolkit(parent=get_default_toolkit())
         for name, tool in effective_toolkit.all().items():
@@ -142,11 +142,11 @@ def _normalize_config_object(
                 and effective_mcp_runtime is None
                 and execution_context is None
             ):
-                from andromeda.tools.mcp_adapter import register_mcp as _register_mcp
+                from CodingLive.andromeda.tools.mcp_adapter import register_mcp as _register_mcp
 
                 _register_mcp(mcp_servers_raw)
             else:
-                from andromeda.tools.mcp_adapter import build_mcp_tools as _build_mcp_tools
+                from CodingLive.andromeda.tools.mcp_adapter import build_mcp_tools as _build_mcp_tools
 
                 scoped_toolkit = _ensure_execution_toolkit()
 
@@ -166,11 +166,11 @@ def _normalize_config_object(
                         and effective_mcp_runtime is None
                         and execution_context is None
                     ):
-                        from andromeda.tools.mcp_adapter import register_mcp as _register_mcp
+                        from CodingLive.andromeda.tools.mcp_adapter import register_mcp as _register_mcp
 
                         _register_mcp(mcp_server)
                     else:
-                        from andromeda.tools.mcp_adapter import build_mcp_tools as _build_mcp_tools
+                        from CodingLive.andromeda.tools.mcp_adapter import build_mcp_tools as _build_mcp_tools
 
                         scoped_toolkit = _ensure_execution_toolkit()
 
@@ -187,11 +187,11 @@ def _normalize_config_object(
 
     if resolve_tools:
         # Importing here to avoid circular import at module import time
-        from andromeda.tools.toolkit import resolve_tool_spec
+        from CodingLive.andromeda.tools.toolkit import resolve_tool_spec
 
         # Import built-in tools so they self-register with the Toolkit.
         try:  # noqa: BLE001
-            import andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
+            import CodingLive.andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
         except ImportError:
             _builtin_tools = None  # type: ignore[assignment]
         resolution_toolkit = _tool_resolution_toolkit()

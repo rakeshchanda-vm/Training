@@ -106,10 +106,10 @@
 
 
 ##############################################################################
-from andromeda.core.agent import Agent
-from andromeda.core.supervisor import Supervisor
-from andromeda.config import AgentConfig, SupervisorConfig, ModelConfig
-from andromeda import HumanMessage
+from CodingLive.andromeda.core.agent import Agent
+from CodingLive.andromeda.core.supervisor import Supervisor
+from CodingLive.andromeda.config import AgentConfig, SupervisorConfig, ModelConfig
+from CodingLive.andromeda import HumanMessage
 
 # Specialist worker configs
 researcher = AgentConfig(

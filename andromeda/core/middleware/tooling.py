@@ -15,7 +15,7 @@ from langchain.agents.middleware.types import (
 from langchain.messages import ToolMessage
 from langchain_core.messages import AIMessage, BaseMessage
 
-from andromeda.utils.logger import log_error
+from CodingLive.andromeda.utils.logger import log_error
 
 
 def _coerce_tool_call_id(value: Any) -> str:

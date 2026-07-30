@@ -6,11 +6,11 @@ from concurrent.futures import ThreadPoolExecutor
 import inspect
 from typing import Iterable, Callable, List, Dict, Any, Optional
 
-from andromeda.retrievers.core import Document, KnowledgeGraphFactRecord
-from andromeda.retrievers.config import RAGRegistry
-from andromeda.retrievers.ingestion_index import SqliteIngestionIndex, sha256_text
-from andromeda.retrievers.kg import KGExtraction, normalize_entity_name, _is_valid_entity_name
-from andromeda.retrievers.processing import DocumentProcessingEngine, RawDocument
+from CodingLive.andromeda.retrievers.core import Document, KnowledgeGraphFactRecord
+from CodingLive.andromeda.retrievers.config import RAGRegistry
+from CodingLive.andromeda.retrievers.ingestion_index import SqliteIngestionIndex, sha256_text
+from CodingLive.andromeda.retrievers.kg import KGExtraction, normalize_entity_name, _is_valid_entity_name
+from CodingLive.andromeda.retrievers.processing import DocumentProcessingEngine, RawDocument
 
 
 Chunker = Callable[[str, Dict[str, Any]], List[Document]]

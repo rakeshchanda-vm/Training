@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Sequence
 
-from andromeda import BaseMessage, HumanMessage
+from CodingLive.andromeda import BaseMessage, HumanMessage
 
 from .context import RuntimeContext, _deep_merge
 from .json_utils import to_json_compatible as _to_json_compatible

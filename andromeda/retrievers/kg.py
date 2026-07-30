@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TypedDict, TYPE_CHECKING
 
-from andromeda.retrievers.core import Document, KnowledgeGraphBackend, KnowledgeGraphFactRecord
-from andromeda.config import ModelConfig
+from CodingLive.andromeda.retrievers.core import Document, KnowledgeGraphBackend, KnowledgeGraphFactRecord
+from CodingLive.andromeda.config import ModelConfig
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -1192,8 +1192,8 @@ def make_llm_entity_extractor(
     If the model cannot be loaded, falls back to the heuristic extractor.
     """
     try:
-        from andromeda.utils import get_chat_model  # type: ignore
-        from andromeda.config import ModelConfig  # type: ignore
+        from CodingLive.andromeda.utils import get_chat_model  # type: ignore
+        from CodingLive.andromeda.config import ModelConfig  # type: ignore
         chat = get_chat_model(model_config)
     except Exception:
         def fallback(text: str) -> List[str]:
@@ -1243,8 +1243,8 @@ def make_llm_kg_extractor(
     If the model cannot be loaded, falls back to the heuristic extractor.
     """
     try:
-        from andromeda.utils import get_chat_model  # type: ignore
-        from andromeda.config import ModelConfig  # type: ignore
+        from CodingLive.andromeda.utils import get_chat_model  # type: ignore
+        from CodingLive.andromeda.config import ModelConfig  # type: ignore
 
         chat = get_chat_model(model_config)
     except Exception:
@@ -1355,8 +1355,8 @@ def make_llm_kg_bundle_extractor(
       {"entities":[...], "triples":[{"subject":"...","predicate":"...","object":"..."}]}
     """
     try:
-        from andromeda.utils import get_chat_model  # type: ignore
-        from andromeda.config import ModelConfig  # type: ignore
+        from CodingLive.andromeda.utils import get_chat_model  # type: ignore
+        from CodingLive.andromeda.config import ModelConfig  # type: ignore
 
         chat = get_chat_model(model_config)
     except Exception:

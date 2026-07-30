@@ -35,18 +35,18 @@ from typing import Any, List, Mapping, Optional, Union
 
 import random
 
-from andromeda import HumanMessage
-from andromeda.config.config import AgentConfig, MiddlewareConfig, WorkspaceAgentConfig
-from andromeda.core.agent import Agent
-from andromeda.core.supervisor import Supervisor
-from andromeda.core.middleware import (
+from CodingLive.andromeda import HumanMessage
+from CodingLive.andromeda.config.config import AgentConfig, MiddlewareConfig, WorkspaceAgentConfig
+from CodingLive.andromeda.core.agent import Agent
+from CodingLive.andromeda.core.supervisor import Supervisor
+from CodingLive.andromeda.core.middleware import (
     ContextEditingMiddleware,
     SkillsMiddleware,
 )
-from andromeda.tools import BaseTool
-from andromeda.utils.logger import log_agent
-from andromeda.utils.prompts import coworker_agent_prompt, workspace_supervisor_prompt
-from andromeda.workspace import WorkspaceSession, WorkspacePolicy, ProviderSettings
+from CodingLive.andromeda.tools import BaseTool
+from CodingLive.andromeda.utils.logger import log_agent
+from CodingLive.andromeda.utils.prompts import coworker_agent_prompt, workspace_supervisor_prompt
+from CodingLive.andromeda.workspace import WorkspaceSession, WorkspacePolicy, ProviderSettings
 
 
 def _dedupe_tools(tools: List[BaseTool]) -> List[BaseTool]:
@@ -459,7 +459,7 @@ class WorkspaceAgent(Supervisor):
 
         # Imported lazily: keeps the andromeda.workspace dependency (and its heavier
         # provider imports) off the andromeda.core import path until a session is needed.
-        from andromeda.workspace import (
+        from CodingLive.andromeda.workspace import (
             BubblewrapProcessSettings,
             GVisorContainerSettings,
             WorkspacePolicy,

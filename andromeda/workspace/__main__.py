@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sys
 
-from andromeda.workspace.availability import check_all_providers
+from CodingLive.andromeda.workspace.availability import check_all_providers
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -27,11 +27,11 @@ from langchain_core.vectorstores import VectorStore
 
 from abc import ABC, abstractmethod
 
-from andromeda.ports._vector_math import (
+from CodingLive.andromeda.ports._vector_math import (
     DistanceStrategy,
     maximal_marginal_relevance,
 )
-from andromeda.utils.logger import log_warning
+from CodingLive.andromeda.utils.logger import log_warning
 
 
 class Docstore(ABC):

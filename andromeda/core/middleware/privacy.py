@@ -7,13 +7,13 @@ from typing import Any, Awaitable, Callable, Dict, Mapping, Optional
 from langchain.agents.middleware import AgentMiddleware, hook_config
 from langchain.messages import AIMessage, ToolMessage
 
-from andromeda.core.middleware.common import (
+from CodingLive.andromeda.core.middleware.common import (
     default_data_patterns,
     mask,
     message_text,
     rewrite_message_content,
 )
-from andromeda.utils.secure_store import InMemoryEncryptedTokenStore
+from CodingLive.andromeda.utils.secure_store import InMemoryEncryptedTokenStore
 
 
 class DataPrivacyMiddleware(AgentMiddleware):

@@ -6,7 +6,7 @@ Supports visualization of Team, Supervisor, and Custom Workflow structures.
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
-from andromeda.config.config import AndromedaConfig
+from CodingLive.andromeda.config.config import AndromedaConfig
 
 
 def _sanitize_id(raw: str) -> str:

@@ -3,14 +3,14 @@ from typing import List, Literal, Optional, Dict, Callable
 import asyncio
 import threading
 from langchain_core.tools import tool
-from andromeda.utils.langtils import get_chat_model
-from andromeda.config.config import ModelConfig
-from andromeda import HumanMessage
+from CodingLive.andromeda.utils.langtils import get_chat_model
+from CodingLive.andromeda.config.config import ModelConfig
+from CodingLive.andromeda import HumanMessage
 from tavily import TavilyClient
 import functools
-from andromeda.utils.prompts import clean_text_prompt
-from andromeda.utils.schemas import CleanText
-from andromeda.tools.toolkit import register_tools
+from CodingLive.andromeda.utils.prompts import clean_text_prompt
+from CodingLive.andromeda.utils.schemas import CleanText
+from CodingLive.andromeda.tools.toolkit import register_tools
 
 def clean_with_AI(text: str, query: str, max_length: int = 10000) -> str:
     """Clean the text using LLM. Useful for cleaning up web scraped text, and narrowing down to the relevant information."""

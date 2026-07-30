@@ -11,14 +11,14 @@ from langchain.agents.middleware import (
     ToolRetryMiddleware,
 )
 
-from andromeda.core.middleware.factory import build_middleware
-from andromeda.core.middleware.guardrails import (
+from CodingLive.andromeda.core.middleware.factory import build_middleware
+from CodingLive.andromeda.core.middleware.guardrails import (
     ComplianceMiddleware,
     PromptInjectionMiddleware,
 )
-from andromeda.core.middleware.privacy import DataPrivacyMiddleware
-from andromeda.core.middleware.tooling import EnsureToolCallIdsMiddleware, tool_error_handler
-from andromeda.core.middleware.skills import SkillsMiddleware
+from CodingLive.andromeda.core.middleware.privacy import DataPrivacyMiddleware
+from CodingLive.andromeda.core.middleware.tooling import EnsureToolCallIdsMiddleware, tool_error_handler
+from CodingLive.andromeda.core.middleware.skills import SkillsMiddleware
 
 __all__ = [
     "ComplianceMiddleware",

@@ -4,8 +4,8 @@ from __future__ import annotations
 import asyncio
 from typing import Literal, List, Dict, Any
 
-from andromeda.retrievers.config import RAGRegistry
-from andromeda.retrievers.core import MetadataFilter, ScoredChunk
+from CodingLive.andromeda.retrievers.config import RAGRegistry
+from CodingLive.andromeda.retrievers.core import MetadataFilter, ScoredChunk
 
 
 RetrievalMode = Literal["dense", "hybrid", "hybrid+rerank", "graphrag"]

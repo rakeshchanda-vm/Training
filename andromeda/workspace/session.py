@@ -8,17 +8,17 @@ from pathlib import Path
 import shutil
 from typing import Any, Iterable, Sequence
 
-from andromeda.tools.filesystem import make_filesystem_tools
-from andromeda.tools.shell import (
+from CodingLive.andromeda.tools.filesystem import make_filesystem_tools
+from CodingLive.andromeda.tools.shell import (
     WorkspaceShellProcessManager,
     make_provider_shell_tools,
     make_shell_tools,
 )
-from andromeda.tools.vfs_filesystem import (
+from CodingLive.andromeda.tools.vfs_filesystem import (
     ReadOnlyFilesystemDriver,
     make_vfs_filesystem_tools,
 )
-from andromeda.workspace.backends import (
+from CodingLive.andromeda.workspace.backends import (
     BackendCapabilities,
     WorkspaceBackendName,
     get_backend_capabilities,
@@ -26,15 +26,15 @@ from andromeda.workspace.backends import (
     validate_backend_compatibility,
     validate_workspace_policy,
 )
-from andromeda.workspace.policy import ToolProfile, WorkspacePolicy
-from andromeda.workspace.provider_settings import ProviderSettings
-from andromeda.workspace.providers import (
+from CodingLive.andromeda.workspace.policy import ToolProfile, WorkspacePolicy
+from CodingLive.andromeda.workspace.provider_settings import ProviderSettings
+from CodingLive.andromeda.workspace.providers import (
     WorkspaceBackendProvider,
     WorkspaceProviderState,
     build_workspace_provider,
     _workspace_from_home,
 )
-from andromeda.workspace.seeds import WorkspaceSeed
+from CodingLive.andromeda.workspace.seeds import WorkspaceSeed
 
 
 MINIMAL_TOOL_KEYS = {"read_file", "apply_patch"}

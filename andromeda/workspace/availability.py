@@ -24,11 +24,11 @@ KNOWN_PROVIDERS = (
 
 def check_provider_availability(provider: str) -> ProviderAvailability:
     if provider == "bubblewrap_process":
-        from andromeda.workspace.sandbox_providers import BubblewrapProcessProvider
+        from CodingLive.andromeda.workspace.sandbox_providers import BubblewrapProcessProvider
 
         return BubblewrapProcessProvider.check_available()
     if provider == "gvisor_container":
-        from andromeda.workspace.sandbox_providers import GVisorContainerProvider
+        from CodingLive.andromeda.workspace.sandbox_providers import GVisorContainerProvider
 
         return GVisorContainerProvider.check_available()
     if provider in {"local_fs", "ephemeral_fs"}:

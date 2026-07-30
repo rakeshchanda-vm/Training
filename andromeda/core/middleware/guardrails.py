@@ -6,7 +6,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 from langchain.agents.middleware import AgentMiddleware, hook_config
 from langchain.messages import AIMessage, ToolMessage
 
-from andromeda.core.middleware.common import message_text
+from CodingLive.andromeda.core.middleware.common import message_text
 
 
 class PromptInjectionMiddleware(AgentMiddleware):

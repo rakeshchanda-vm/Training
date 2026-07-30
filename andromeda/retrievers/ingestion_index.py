@@ -8,7 +8,7 @@ import threading
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from andromeda.retrievers.sqlalchemy_url import sqlalchemy_async_postgres_url
+from CodingLive.andromeda.retrievers.sqlalchemy_url import sqlalchemy_async_postgres_url
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine

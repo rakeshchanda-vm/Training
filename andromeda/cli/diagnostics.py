@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 
-from andromeda.cli.helpers import console
+from CodingLive.andromeda.cli.helpers import console
 
 def check_dependencies():
     """Check system dependencies"""

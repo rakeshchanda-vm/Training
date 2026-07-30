@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 
-from andromeda.config.yaml_utils import yaml_load
+from CodingLive.andromeda.config.yaml_utils import yaml_load
 
 
 RUNTIME_CONFIG_FILENAMES = ("andromeda.yaml", "andromeda.yml")

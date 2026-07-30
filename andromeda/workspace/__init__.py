@@ -1,16 +1,16 @@
-from andromeda.workspace.backends import (
+from CodingLive.andromeda.workspace.backends import (
     BackendCapabilities,
     WorkspaceBackendName,
     WorkspaceCompatibilityError,
 )
-from andromeda.workspace.policy import FilePolicy, ShellPolicy, WorkspacePolicy
-from andromeda.workspace.policy import ToolProfile
-from andromeda.workspace.availability import (
+from CodingLive.andromeda.workspace.policy import FilePolicy, ShellPolicy, WorkspacePolicy
+from CodingLive.andromeda.workspace.policy import ToolProfile
+from CodingLive.andromeda.workspace.availability import (
     ProviderAvailability,
     check_all_providers,
     check_provider_availability,
 )
-from andromeda.workspace.provider_settings import (
+from CodingLive.andromeda.workspace.provider_settings import (
     BubblewrapProcessSettings,
     ContainerdKataSettings,
     GVisorContainerSettings,
@@ -18,7 +18,7 @@ from andromeda.workspace.provider_settings import (
     PostgresVFSSettings,
     ProviderSettings,
 )
-from andromeda.workspace.providers import (
+from CodingLive.andromeda.workspace.providers import (
     ContainerdKataSandboxProvider,
     EphemeralFilesystemProvider,
     ExecResult,
@@ -32,11 +32,11 @@ from andromeda.workspace.providers import (
     WorkspaceProviderError,
     WorkspaceProviderState,
 )
-from andromeda.workspace.sandbox_providers import (
+from CodingLive.andromeda.workspace.sandbox_providers import (
     BubblewrapProcessProvider,
     GVisorContainerProvider,
 )
-from andromeda.workspace.seeds import (
+from CodingLive.andromeda.workspace.seeds import (
     DirectorySeed,
     FileSeed,
     GitSeed,
@@ -44,7 +44,7 @@ from andromeda.workspace.seeds import (
     S3SnapshotSeed,
     WorkspaceSeed,
 )
-from andromeda.workspace.session import WorkspaceHomeConfig, WorkspaceSession, WorkspaceToolset
+from CodingLive.andromeda.workspace.session import WorkspaceHomeConfig, WorkspaceSession, WorkspaceToolset
 
 __all__ = [
     "BackendCapabilities",

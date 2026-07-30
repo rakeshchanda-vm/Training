@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from andromeda.cli.helpers import console
+from CodingLive.andromeda.cli.helpers import console
 
 def mermaid_to_text(diagram_code: str) -> str:
     """Convert mermaid diagram code to a simple text representation.

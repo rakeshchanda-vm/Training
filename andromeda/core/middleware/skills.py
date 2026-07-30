@@ -33,8 +33,8 @@ from langchain.agents.middleware.types import (
 from langgraph.prebuilt import ToolRuntime
 from langgraph.prebuilt.tool_node import ToolCallRequest
 
-from andromeda.core.middleware.tooling import _coerce_tool_call_id
-from andromeda.utils.logger import log_error, log_warning
+from CodingLive.andromeda.core.middleware.tooling import _coerce_tool_call_id
+from CodingLive.andromeda.utils.logger import log_error, log_warning
 
 # Security: Maximum size for SKILL.md files to prevent DoS attacks (10MB)
 MAX_SKILL_FILE_SIZE = 10 * 1024 * 1024
@@ -1220,7 +1220,7 @@ class SkillsMiddleware(AgentMiddleware[SkillsState, ContextT, ResponseT]):
             return []
 
         try:
-            from andromeda.tools.toolkit import get_default_toolkit
+            from CodingLive.andromeda.tools.toolkit import get_default_toolkit
         except Exception:  # noqa: BLE001
             log_error("Failed to import andromeda.tools.toolkit")
             return []
@@ -1259,7 +1259,7 @@ class SkillsMiddleware(AgentMiddleware[SkillsState, ContextT, ResponseT]):
             return None
 
         try:
-            from andromeda.tools.toolkit import get_default_toolkit
+            from CodingLive.andromeda.tools.toolkit import get_default_toolkit
         except Exception:  # noqa: BLE001
             log_error("Failed to import andromeda.tools.toolkit")
             return None

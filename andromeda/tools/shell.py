@@ -13,7 +13,7 @@ import uuid
 from typing import Any, List, Optional, Sequence
 
 from langchain_core.tools import tool
-from andromeda.utils.ignore_rules import (
+from CodingLive.andromeda.utils.ignore_rules import (
     IgnoreMatcher,
     ensure_ripgrep_ignore_config,
     ripgrep_config_workspace_path,
@@ -142,7 +142,7 @@ def _truncate_output(text: str, limit: int) -> str:
 
 
 def _command_policy_kwargs(policy: Any) -> dict[str, Any]:
-    from andromeda.workspace.sandbox import SANDBOX_DENIED_ARGV
+    from CodingLive.andromeda.workspace.sandbox import SANDBOX_DENIED_ARGV
 
     return {
         "allowed_commands": getattr(policy, "allowed_commands", None),
@@ -151,7 +151,7 @@ def _command_policy_kwargs(policy: Any) -> dict[str, Any]:
 
 
 def _validate_command_policy(argv: Sequence[str], policy: Any) -> None:
-    from andromeda.workspace.sandbox import validate_shell_argv
+    from CodingLive.andromeda.workspace.sandbox import validate_shell_argv
 
     validate_shell_argv(argv, **_command_policy_kwargs(policy))
 
@@ -361,7 +361,7 @@ def make_shell_tools(
     if not workspace_root.is_dir():
         raise ValueError(f"Shell workspace root does not exist: {workspace_root}")
 
-    from andromeda.workspace.policy import ShellPolicy
+    from CodingLive.andromeda.workspace.policy import ShellPolicy
 
     shell_policy = policy or ShellPolicy()
     manager = process_manager or WorkspaceShellProcessManager(workspace_root, shell_policy)
@@ -507,7 +507,7 @@ def _provider_shell_env(provider: Any, shell_policy: Any) -> dict[str, str]:
     state = getattr(provider, "state", None)
     workspace_root = getattr(state, "root", None)
     if _provider_uses_sandbox_env(provider):
-        from andromeda.workspace.sandbox import build_sandbox_env
+        from CodingLive.andromeda.workspace.sandbox import build_sandbox_env
 
         sandbox_home = _provider_sandbox_home(provider)
         env = build_sandbox_env(shell_policy, home=sandbox_home)
@@ -534,7 +534,7 @@ def _provider_network_enabled(provider: Any, shell_policy: Any) -> bool:
 
 
 def make_provider_shell_tools(provider: Any, policy: Any | None = None) -> dict[str, object]:
-    from andromeda.workspace.policy import ShellPolicy
+    from CodingLive.andromeda.workspace.policy import ShellPolicy
 
     shell_policy = policy or ShellPolicy()
     workspace_cwd = _provider_exec_cwd(provider)

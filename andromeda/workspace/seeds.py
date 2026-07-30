@@ -6,7 +6,7 @@ import shutil
 import subprocess
 from typing import Protocol
 
-from andromeda.workspace.policy import FilePolicy
+from CodingLive.andromeda.workspace.policy import FilePolicy
 
 
 class WorkspaceSeed(Protocol):

@@ -4,19 +4,19 @@ from typing import Any, List, Optional
 
 from langchain.agents.middleware import HumanInTheLoopMiddleware, SummarizationMiddleware
 
-from andromeda.config.config import MiddlewareConfig, ModelConfig
-from andromeda.core.middleware.common import (
+from CodingLive.andromeda.config.config import MiddlewareConfig, ModelConfig
+from CodingLive.andromeda.core.middleware.common import (
     resolve_compliance_patterns,
     resolve_data_patterns,
     resolve_prompt_injection_patterns,
 )
-from andromeda.core.middleware.guardrails import (
+from CodingLive.andromeda.core.middleware.guardrails import (
     ComplianceMiddleware,
     PromptInjectionMiddleware,
 )
-from andromeda.core.middleware.privacy import DataPrivacyMiddleware
-from andromeda.core.middleware.tooling import tool_error_handler
-from andromeda.utils.secure_store import InMemoryEncryptedTokenStore, get_secure_store
+from CodingLive.andromeda.core.middleware.privacy import DataPrivacyMiddleware
+from CodingLive.andromeda.core.middleware.tooling import tool_error_handler
+from CodingLive.andromeda.utils.secure_store import InMemoryEncryptedTokenStore, get_secure_store
 
 
 def resolve_summarization_model(
@@ -26,12 +26,12 @@ def resolve_summarization_model(
     configured = summarization_cfg.model
     if configured is None:
         if isinstance(fallback_model, ModelConfig):
-            from andromeda.utils.langtils import get_chat_model
+            from CodingLive.andromeda.utils.langtils import get_chat_model
 
             return get_chat_model(fallback_model)
         return fallback_model
     if isinstance(configured, ModelConfig):
-        from andromeda.utils.langtils import get_chat_model
+        from CodingLive.andromeda.utils.langtils import get_chat_model
 
         return get_chat_model(configured)
     return configured

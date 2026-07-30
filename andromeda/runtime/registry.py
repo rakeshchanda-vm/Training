@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Literal, Mapping, Optional, Tuple
 
-from andromeda.config.yaml_utils import yaml_load
+from CodingLive.andromeda.config.yaml_utils import yaml_load
 
 from .context import RuntimeContext
 from .validation import error, ValidationIssue

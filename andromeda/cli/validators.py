@@ -6,21 +6,21 @@ from typing import Any, Dict, List
 
 import yaml
 
-from andromeda.config.config import AndromedaConfig
-from andromeda.config.yaml_utils import yaml_load
-from andromeda.cli.helpers import console, discover_config_files
+from CodingLive.andromeda.config.config import AndromedaConfig
+from CodingLive.andromeda.config.yaml_utils import yaml_load
+from CodingLive.andromeda.cli.helpers import console, discover_config_files
 
 def run_tool_diagnostics() -> None:
     """Inspect the global tool registry and how config files reference tools."""
 
     # Import built-in tools so they self-register with the Toolkit.
     try:  # noqa: F401
-        import andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
+        import CodingLive.andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
     except ImportError:
         _builtin_tools = None  # type: ignore[assignment]
 
     try:
-        from andromeda.tools.toolkit import get_default_toolkit
+        from CodingLive.andromeda.tools.toolkit import get_default_toolkit
     except ImportError as exc:
         console.print(
             f"[red]✗[/red] Unable to import tool registry (andromeda.tools.toolkit): {exc}"
@@ -261,7 +261,7 @@ def run_config_diagnostics() -> None:
     # Ensure built-in tools are registered so AndromedaConfig.load_from_file
     # can resolve tool names referenced in config.
     try:  # noqa: F401
-        import andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
+        import CodingLive.andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
     except ImportError:
         _builtin_tools = None  # type: ignore[assignment]
 

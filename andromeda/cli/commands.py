@@ -11,36 +11,36 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from andromeda.config.config import AndromedaConfig
-from andromeda.config.yaml_utils import yaml_dump
-from andromeda.cli.config_generator import generate_example_config
-from andromeda.cli.env_generator import generate_example_env
-from andromeda.cli.validators import (
+from CodingLive.andromeda.config.config import AndromedaConfig
+from CodingLive.andromeda.config.yaml_utils import yaml_dump
+from CodingLive.andromeda.cli.config_generator import generate_example_config
+from CodingLive.andromeda.cli.env_generator import generate_example_env
+from CodingLive.andromeda.cli.validators import (
     validate_configuration_file,
     run_config_diagnostics,
     run_tool_diagnostics,
     display_config_summary,
 )
-from andromeda.cli.display import (
+from CodingLive.andromeda.cli.display import (
     display_config_options_help,
     display_env_vars_help,
     display_env_table,
 )
-from andromeda.cli.diagnostics import (
+from CodingLive.andromeda.cli.diagnostics import (
     check_dependencies,
     test_service_connections,
     check_environment_setup,
 )
-from andromeda.cli.setup_wizard import run_setup_wizard
-from andromeda.cli.helpers import console, discover_config_files
-from andromeda.cli.visualize_helpers import mermaid_to_text, render_mermaid_to_image
-from andromeda import BaseMessage
-from andromeda.runtime import AndromedaRuntime
-from andromeda.runtime.json_utils import (
+from CodingLive.andromeda.cli.setup_wizard import run_setup_wizard
+from CodingLive.andromeda.cli.helpers import console, discover_config_files
+from CodingLive.andromeda.cli.visualize_helpers import mermaid_to_text, render_mermaid_to_image
+from CodingLive.andromeda import BaseMessage
+from CodingLive.andromeda.runtime import AndromedaRuntime
+from CodingLive.andromeda.runtime.json_utils import (
     message_content,
     to_json_compatible as _to_json_compatible,
 )
-from andromeda.runtime.validation import RunnableAmbiguousError, RunnableNotFoundError
+from CodingLive.andromeda.runtime.validation import RunnableAmbiguousError, RunnableNotFoundError
 
 
 _BASE_MESSAGE_TYPE = BaseMessage if isinstance(BaseMessage, type) else ()
@@ -417,11 +417,11 @@ def register_commands(cli):
 
         # Import built-in tools so they self-register with the Toolkit.
         try:  # noqa: F401
-            import andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
+            import CodingLive.andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
         except ImportError:
             _builtin_tools = None  # type: ignore[assignment]
 
-        from andromeda.tools.toolkit import get_default_toolkit
+        from CodingLive.andromeda.tools.toolkit import get_default_toolkit
 
         toolkit = get_default_toolkit()
         tools = toolkit.all()
@@ -772,7 +772,7 @@ def register_commands(cli):
         )
         
         # Import visualization modules and helpers
-        from andromeda.cli.visualize import (
+        from CodingLive.andromeda.cli.visualize import (
             visualize_team_workflow,
             visualize_supervisor_workflow,
             visualize_custom_workflow,
@@ -825,7 +825,7 @@ def register_commands(cli):
             try:
                 # Ensure built-in tools are registered
                 try:  # noqa: F401
-                    import andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
+                    import CodingLive.andromeda.tools.tools as _builtin_tools  # type: ignore[unused-import]
                 except ImportError:
                     _builtin_tools = None  # type: ignore[assignment]
                 

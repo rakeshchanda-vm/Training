@@ -1,9 +1,9 @@
 from typing import List
-from andromeda import SystemMessage, BaseMessage
-from andromeda.utils.prompts import sufficiency_prompt
-from andromeda.utils.schemas import SufficiencyResponse
-from andromeda.utils.langtils import get_chat_model
-from andromeda.config import ModelConfig
+from CodingLive.andromeda import SystemMessage, BaseMessage
+from CodingLive.andromeda.utils.prompts import sufficiency_prompt
+from CodingLive.andromeda.utils.schemas import SufficiencyResponse
+from CodingLive.andromeda.utils.langtils import get_chat_model
+from CodingLive.andromeda.config import ModelConfig
 
 
 def sufficiency_check(

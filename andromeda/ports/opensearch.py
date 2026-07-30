@@ -20,7 +20,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.utils import get_from_dict_or_env
 from langchain_core.vectorstores import VectorStore
 
-from andromeda.ports._vector_math import maximal_marginal_relevance
+from CodingLive.andromeda.ports._vector_math import maximal_marginal_relevance
 
 
 IMPORT_OPENSEARCH_PY_ERROR = (

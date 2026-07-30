@@ -1,10 +1,10 @@
 """Retriever building blocks for Andromeda."""
 
-from andromeda.retrievers.config import CorpusConfig, RAGConfig, RAGRegistry
-from andromeda.retrievers.core import Document, MetadataFilter, ScoredChunk
-from andromeda.retrievers.ingest import ingest_corpus, aingest_corpus
-from andromeda.retrievers.processing import ChunkingConfig, DocumentProcessingEngine, RawDocument
-from andromeda.retrievers.service import RetrievalService, AsyncRetrievalService
+from CodingLive.andromeda.retrievers.config import CorpusConfig, RAGConfig, RAGRegistry
+from CodingLive.andromeda.retrievers.core import Document, MetadataFilter, ScoredChunk
+from CodingLive.andromeda.retrievers.ingest import ingest_corpus, aingest_corpus
+from CodingLive.andromeda.retrievers.processing import ChunkingConfig, DocumentProcessingEngine, RawDocument
+from CodingLive.andromeda.retrievers.service import RetrievalService, AsyncRetrievalService
 
 __all__ = [
     "ChunkingConfig",

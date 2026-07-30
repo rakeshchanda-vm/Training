@@ -3,20 +3,20 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from andromeda.cli.config_generator import (
+from CodingLive.andromeda.cli.config_generator import (
     generate_default_config,
     generate_interactive_config,
     tune_config_interactive,
 )
-from andromeda.cli.env_generator import generate_example_env
-from andromeda.config.yaml_utils import yaml_dump
-from andromeda.cli.helpers import (
+from CodingLive.andromeda.cli.env_generator import generate_example_env
+from CodingLive.andromeda.config.yaml_utils import yaml_dump
+from CodingLive.andromeda.cli.helpers import (
     HAS_QUESTIONARY,
     ask_bool,
     console,
     slugify_identifier,
 )
-from andromeda.cli.prebuilt_templates import (
+from CodingLive.andromeda.cli.prebuilt_templates import (
     PREBUILT_AGENT_TEMPLATES,
     apply_prebuilt_agent_templates,
 )

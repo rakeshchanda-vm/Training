@@ -6,8 +6,8 @@ import math
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, TypedDict
 
-from andromeda.config.config import ModelConfig
-from andromeda.retrievers.core import Reranker, ScoredChunk
+from CodingLive.andromeda.config.config import ModelConfig
+from CodingLive.andromeda.retrievers.core import Reranker, ScoredChunk
 
 
 def _dot(a: Sequence[float], b: Sequence[float]) -> float:
@@ -137,8 +137,8 @@ class LLMListwiseReranker(Reranker):
     def __init__(self, config: LLMRerankerConfig):
         self._cfg = config
         try:
-            from andromeda.utils import get_chat_model  # type: ignore
-            from andromeda.config import ModelConfig  # type: ignore
+            from CodingLive.andromeda.utils import get_chat_model  # type: ignore
+            from CodingLive.andromeda.config import ModelConfig  # type: ignore
 
             self._chat = get_chat_model(config.model)
         except Exception:

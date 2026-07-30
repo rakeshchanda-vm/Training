@@ -8,7 +8,7 @@ import threading
 from dataclasses import dataclass
 from typing import Any, Dict, List, TYPE_CHECKING
 
-from andromeda.retrievers.core import Document, DocumentStoreBackend
+from CodingLive.andromeda.retrievers.core import Document, DocumentStoreBackend
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine

@@ -9,7 +9,7 @@ import glob
 from datetime import datetime
 from charset_normalizer import from_path
 from pydantic import BaseModel
-from andromeda.utils.ignore_rules import IgnoreMatcher, manual_ignore_matches
+from CodingLive.andromeda.utils.ignore_rules import IgnoreMatcher, manual_ignore_matches
 
 
 _PATCH_FILE_HEADER_RE = re.compile(r"^\*\*\* (Add|Update|Delete) File: (.+)$")

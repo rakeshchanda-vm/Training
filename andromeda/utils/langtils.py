@@ -14,7 +14,7 @@ from langchain_core.messages import (
 from langchain.chat_models import init_chat_model, BaseChatModel
 from langchain.embeddings import init_embeddings, Embeddings
 
-from andromeda.config import ModelConfig
+from CodingLive.andromeda.config import ModelConfig
 
 
 def _uses_openai_responses_api(model_config: ModelConfig) -> bool:
@@ -42,7 +42,7 @@ def _uses_openai_responses_api(model_config: ModelConfig) -> bool:
 
 def get_chat_model(model_config: ModelConfig) -> BaseChatModel:
     if model_config.provider == "github_copilot":
-        from andromeda.utils.github_copilot import ChatGithubCopilot
+        from CodingLive.andromeda.utils.github_copilot import ChatGithubCopilot
         gh_kwargs = {
             "temperature": model_config.temperature,
             **model_config.other_args,
@@ -54,7 +54,7 @@ def get_chat_model(model_config: ModelConfig) -> BaseChatModel:
             **gh_kwargs,
         )
     if model_config.provider == "openai_codex":
-        from andromeda.utils.openai_codex import ChatOpenAICodex
+        from CodingLive.andromeda.utils.openai_codex import ChatOpenAICodex
         return ChatOpenAICodex(
             model=model_config.name,
             output_version=model_config.output_version,
@@ -73,7 +73,7 @@ def get_chat_model(model_config: ModelConfig) -> BaseChatModel:
             **litellm_kwargs,
         )
     if model_config.provider == "openai" and _uses_openai_responses_api(model_config):
-        from andromeda.utils.openai_responses import AndromedaChatOpenAI
+        from CodingLive.andromeda.utils.openai_responses import AndromedaChatOpenAI
 
         openai_kwargs = {
             "temperature": model_config.temperature,
@@ -97,7 +97,7 @@ def get_chat_model(model_config: ModelConfig) -> BaseChatModel:
 
 def get_embedding_model(model_config: ModelConfig) -> Embeddings:
     if model_config.provider == "github_copilot":
-        from andromeda.utils.github_copilot import GithubCopilotEmbeddings
+        from CodingLive.andromeda.utils.github_copilot import GithubCopilotEmbeddings
         return GithubCopilotEmbeddings(
             model=model_config.name,
             **model_config.other_args,

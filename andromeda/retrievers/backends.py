@@ -9,8 +9,8 @@ from typing import Any, Dict, List
 from langchain_core.documents import Document as LCDocument
 from langchain_core.embeddings import Embeddings
 
-from andromeda.ports.bm25 import BM25Retriever
-from andromeda.retrievers.core import (
+from CodingLive.andromeda.ports.bm25 import BM25Retriever
+from CodingLive.andromeda.retrievers.core import (
     Document,
     LexicalBackend,
     MetadataFilter,

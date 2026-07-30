@@ -46,7 +46,7 @@ import httpx
 from langchain_core.messages import BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, ChatResult
 
-from andromeda.utils.logger import log_output
+from CodingLive.andromeda.utils.logger import log_output
 
 # --------------------------------------------------------------------------- #
 # Constants

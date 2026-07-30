@@ -16,15 +16,15 @@ import uuid
 from typing import Any, Callable, Collection, Protocol, Sequence
 from urllib import error, request
 
-from andromeda.tools.vfs_filesystem import (
+from CodingLive.andromeda.tools.vfs_filesystem import (
     FilesystemDriver,
     InMemoryFilesystemDriver,
     PostgresFilesystemDriver,
     ReadOnlyFilesystemDriver,
     ScopedFilesystemDriver,
 )
-from andromeda.workspace.policy import WorkspacePolicy
-from andromeda.workspace.provider_settings import (
+from CodingLive.andromeda.workspace.policy import WorkspacePolicy
+from CodingLive.andromeda.workspace.provider_settings import (
     BubblewrapProcessSettings,
     ContainerdKataSettings,
     GVisorContainerSettings,
@@ -32,7 +32,7 @@ from andromeda.workspace.provider_settings import (
     PostgresVFSSettings,
     ProviderSettings,
 )
-from andromeda.workspace.sandbox import SANDBOX_DENIED_ARGV, validate_shell_argv
+from CodingLive.andromeda.workspace.sandbox import SANDBOX_DENIED_ARGV, validate_shell_argv
 
 _VALID_ENV_KEY_RE = re.compile(r'[A-Za-z_][A-Za-z0-9_]*')
 _VALID_PROCESS_ID_RE = re.compile(r"[0-9a-f]{32}")
@@ -1057,14 +1057,14 @@ def _validate_injected_provider(
                 "settings=PostgresVFSSettings(...) requires PostgresVFSProvider."
             )
     if backend == "bubblewrap_process" and settings is not None:
-        from andromeda.workspace.sandbox_providers import BubblewrapProcessProvider
+        from CodingLive.andromeda.workspace.sandbox_providers import BubblewrapProcessProvider
 
         if not isinstance(provider, BubblewrapProcessProvider):
             raise WorkspaceProviderError(
                 "settings=BubblewrapProcessSettings(...) requires BubblewrapProcessProvider."
             )
     if backend == "gvisor_container" and settings is not None:
-        from andromeda.workspace.sandbox_providers import GVisorContainerProvider
+        from CodingLive.andromeda.workspace.sandbox_providers import GVisorContainerProvider
 
         if not isinstance(provider, GVisorContainerProvider):
             raise WorkspaceProviderError(
@@ -1098,11 +1098,11 @@ def build_workspace_provider(
     if backend == "postgres_vfs":
         return PostgresVFSProvider(settings)  # type: ignore[arg-type]
     if backend == "bubblewrap_process":
-        from andromeda.workspace.sandbox_providers import BubblewrapProcessProvider
+        from CodingLive.andromeda.workspace.sandbox_providers import BubblewrapProcessProvider
 
         return BubblewrapProcessProvider(settings)  # type: ignore[arg-type]
     if backend == "gvisor_container":
-        from andromeda.workspace.sandbox_providers import GVisorContainerProvider
+        from CodingLive.andromeda.workspace.sandbox_providers import GVisorContainerProvider
 
         return GVisorContainerProvider(settings)  # type: ignore[arg-type]
     if backend == "microvm":

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from andromeda import BaseMessage
+from CodingLive.andromeda import BaseMessage
 
 
 _BASE_MESSAGE_TYPE = BaseMessage if isinstance(BaseMessage, type) else ()

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from andromeda.config.config import (
+from CodingLive.andromeda.config.config import (
     CompliancePatternsConfig,
     DataPatternsConfig,
     PromptInjectionPatternsConfig,

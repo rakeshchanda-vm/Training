@@ -1,4 +1,4 @@
-from andromeda.tools.tools import (
+from CodingLive.andromeda.tools.tools import (
     tool,
     web_search,
     news_search,
@@ -7,9 +7,9 @@ from andromeda.tools.tools import (
     search_context_processor,
     get_search_context,
 )
-from andromeda.tools.toolkit import register_tools, resolve_tool_spec, BaseTool
-from andromeda.tools.filesystem import make_filesystem_tools
-from andromeda.tools.shell import make_shell_tools
+from CodingLive.andromeda.tools.toolkit import register_tools, resolve_tool_spec, BaseTool
+from CodingLive.andromeda.tools.filesystem import make_filesystem_tools
+from CodingLive.andromeda.tools.shell import make_shell_tools
 
 
 __all__ = [

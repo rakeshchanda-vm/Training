@@ -13,7 +13,7 @@ from typing import Any, Callable, Iterator, Literal, Optional
 
 from langchain_core.tools import tool
 from pydantic import BaseModel
-from andromeda.utils.ignore_rules import VFSIgnoreMatcher, manual_ignore_matches
+from CodingLive.andromeda.utils.ignore_rules import VFSIgnoreMatcher, manual_ignore_matches
 
 
 _PATCH_FILE_HEADER_RE = re.compile(r"^\*\*\* (Add|Update|Delete) File: (.+)$")

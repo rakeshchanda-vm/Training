@@ -4,7 +4,7 @@ from typing import Dict
 
 from rich.table import Table
 
-from andromeda.cli.helpers import console
+from CodingLive.andromeda.cli.helpers import console
 
 def display_config_options_help():
     """Display comprehensive help for configuration options"""

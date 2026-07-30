@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Set
 
-from andromeda.retrievers.core import Document
+from CodingLive.andromeda.retrievers.core import Document
 
 
 TextNormalizer = Callable[[str], str]

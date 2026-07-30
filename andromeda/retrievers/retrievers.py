@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Dict, List, Optional
 
-from andromeda.retrievers.core import (
+from CodingLive.andromeda.retrievers.core import (
     LexicalBackend,
     MetadataFilter,
     Reranker,

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from andromeda.workspace.policy import ToolProfile, WorkspacePolicy
+from CodingLive.andromeda.workspace.policy import ToolProfile, WorkspacePolicy
 
 
 WorkspaceBackendName = Literal[

@@ -38,7 +38,7 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from langchain.tools import BaseTool
 from langchain_core.tools import StructuredTool # exception for this one to not use langchain.tools
 
-from andromeda.tools.toolkit import Toolkit, register_tool
+from CodingLive.andromeda.tools.toolkit import Toolkit, register_tool
 
 # Cache for lazily-imported MCP client classes. We intentionally avoid static
 # imports so that type-checkers do not require the optional dependency.

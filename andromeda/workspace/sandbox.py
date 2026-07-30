@@ -6,7 +6,7 @@ import subprocess
 import time
 from typing import Any, Callable, Collection, Mapping, Sequence
 
-from andromeda.workspace.policy import DEFAULT_DENIED_COMMANDS, ShellPolicy
+from CodingLive.andromeda.workspace.policy import DEFAULT_DENIED_COMMANDS, ShellPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ def run_captured_command(
     runner: Callable[..., subprocess.CompletedProcess[str]] | None = None,
 ) -> tuple[int, str, str, bool, int]:
     """Run a command and return exit_code, stdout, stderr, timed_out, duration_ms."""
-    from andromeda.workspace.providers import ShellExecutionResult
+    from CodingLive.andromeda.workspace.providers import ShellExecutionResult
 
     run = runner or subprocess.run
     started = time.monotonic()
@@ -161,7 +161,7 @@ def make_shell_result(
     command: Sequence[str],
     cwd: str,
 ) -> "ShellExecutionResult":
-    from andromeda.workspace.providers import ShellExecutionResult
+    from CodingLive.andromeda.workspace.providers import ShellExecutionResult
 
     return ShellExecutionResult(
         exit_code=exit_code,

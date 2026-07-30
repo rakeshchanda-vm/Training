@@ -75,7 +75,7 @@ def _init_cli():
         )
 
     _cli = _build_cli()
-    from andromeda.cli.commands import register_commands
+    from CodingLive.andromeda.cli.commands import register_commands
     register_commands(_cli)
 
 
@@ -94,8 +94,8 @@ def _init_commands():
             "Install them with: pip install 'andromeda[cli]'"
         )
 
-    import andromeda.cli.commands
-    _commands = andromeda.cli.commands
+    import CodingLive.andromeda.cli.commands
+    _commands = CodingLive.andromeda.cli.commands
 
 
 def __getattr__(name):

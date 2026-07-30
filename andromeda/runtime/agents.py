@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
 
-from andromeda.config.config import WorkspaceAgentConfig, _normalize_config_object
-from andromeda.core import WorkspaceAgent
+from CodingLive.andromeda.config.config import WorkspaceAgentConfig, _normalize_config_object
+from CodingLive.andromeda.core import WorkspaceAgent
 
 from .context import RuntimeContext, _deep_merge
 

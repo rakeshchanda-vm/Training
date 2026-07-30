@@ -4,14 +4,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, Literal, Optional, Callable, List
 
-from andromeda.retrievers.core import (
+from CodingLive.andromeda.retrievers.core import (
     VectorStoreBackend,
     LexicalBackend,
     KnowledgeGraphBackend,
     Reranker,
     DocumentStoreBackend,
 )
-from andromeda.retrievers.backends import (
+from CodingLive.andromeda.retrievers.backends import (
     ChromaBackend,
     FaissBackend,
     AzureSearchBackend,
@@ -21,9 +21,9 @@ from andromeda.retrievers.backends import (
     OpenSearchBackend,
     BM25LexicalBackend,
 )
-from andromeda.retrievers.retrievers import DenseRetriever, HybridRetriever, AsyncDenseRetriever, AsyncHybridRetriever, NoopReranker
-from andromeda.retrievers.graph import GraphRAGRetriever, AsyncGraphRAGRetriever
-from andromeda.retrievers.docstore import (
+from CodingLive.andromeda.retrievers.retrievers import DenseRetriever, HybridRetriever, AsyncDenseRetriever, AsyncHybridRetriever, NoopReranker
+from CodingLive.andromeda.retrievers.graph import GraphRAGRetriever, AsyncGraphRAGRetriever
+from CodingLive.andromeda.retrievers.docstore import (
     InMemoryDocumentStore,
     PostgresDocumentStore,
     AsyncPostgresDocumentStore,
@@ -31,9 +31,9 @@ from andromeda.retrievers.docstore import (
     SqliteDocumentStore,
     SqliteDocumentStoreConfig,
 )
-from andromeda.retrievers.ingestion_index import PostgresIngestionIndex, AsyncPostgresIngestionIndex, PostgresIngestionIndexConfig, SqliteIngestionIndex
-from andromeda.retrievers.processing import ChunkingConfig
-from andromeda.retrievers.kg import (
+from CodingLive.andromeda.retrievers.ingestion_index import PostgresIngestionIndex, AsyncPostgresIngestionIndex, PostgresIngestionIndexConfig, SqliteIngestionIndex
+from CodingLive.andromeda.retrievers.processing import ChunkingConfig
+from CodingLive.andromeda.retrievers.kg import (
     InMemoryKnowledgeGraph,
     PostgresKnowledgeGraph,
     AsyncPostgresKnowledgeGraph,
@@ -318,7 +318,7 @@ class RAGRegistry:
                         pass
 
                 try:
-                    from andromeda.retrievers.kg import simple_entity_extractor
+                    from CodingLive.andromeda.retrievers.kg import simple_entity_extractor
                 except Exception:
                     def simple_entity_extractor(text: str):
                         return []

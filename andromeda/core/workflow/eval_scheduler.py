@@ -19,7 +19,7 @@ import threading
 import time
 from typing import Any, Callable, Optional
 
-from andromeda.utils.logger import log_warning
+from CodingLive.andromeda.utils.logger import log_warning
 
 
 def get_safe_process_count() -> int:

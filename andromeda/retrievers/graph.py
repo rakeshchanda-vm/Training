@@ -4,16 +4,16 @@ from __future__ import annotations
 import asyncio
 from typing import Callable, Dict, List, Optional, Set
 
-from andromeda.retrievers.core import DocumentStoreBackend
-from andromeda.retrievers.core import KnowledgeGraphBackend, MetadataFilter, ScoredChunk
-from andromeda.retrievers.core import metadata_matches_filter
-from andromeda.retrievers.retrievers import (
+from CodingLive.andromeda.retrievers.core import DocumentStoreBackend
+from CodingLive.andromeda.retrievers.core import KnowledgeGraphBackend, MetadataFilter, ScoredChunk
+from CodingLive.andromeda.retrievers.core import metadata_matches_filter
+from CodingLive.andromeda.retrievers.retrievers import (
     AsyncDenseRetriever,
     AsyncHybridRetriever,
     DenseRetriever,
     HybridRetriever,
 )
-from andromeda.retrievers.kg import _is_valid_entity_name, normalize_entity_name
+from CodingLive.andromeda.retrievers.kg import _is_valid_entity_name, normalize_entity_name
 
 
 EntityExtractor = Callable[[str], List[str]]

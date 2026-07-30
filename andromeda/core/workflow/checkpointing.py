@@ -10,7 +10,7 @@ from typing import Any, Optional
 
 from langgraph.checkpoint.memory import InMemorySaver
 
-from andromeda.config.config import CheckpointerConfig
+from CodingLive.andromeda.config.config import CheckpointerConfig
 
 
 class CheckpointerDependencyError(RuntimeError):

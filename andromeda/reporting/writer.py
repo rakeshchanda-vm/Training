@@ -7,13 +7,13 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Literal, Optional
 
-from andromeda import BaseMessage, HumanMessage
-from andromeda.config import ModelConfig
-from andromeda.config.config import AgentConfig, SupervisorConfig
-from andromeda.reporting.mermaid import generate_mermaid_diagram
-from andromeda.tools.tools import get_search_context
-from andromeda.utils.logger import log_output, log_supervisor
-from andromeda.workspace import WorkspacePolicy, WorkspaceSession
+from CodingLive.andromeda import BaseMessage, HumanMessage
+from CodingLive.andromeda.config import ModelConfig
+from CodingLive.andromeda.config.config import AgentConfig, SupervisorConfig
+from CodingLive.andromeda.reporting.mermaid import generate_mermaid_diagram
+from CodingLive.andromeda.tools.tools import get_search_context
+from CodingLive.andromeda.utils.logger import log_output, log_supervisor
+from CodingLive.andromeda.workspace import WorkspacePolicy, WorkspaceSession
 
 
 class ReportWriter:
@@ -149,7 +149,7 @@ class ReportWriter:
         current_tools = list(report_supervisor_config.tools)
         report_supervisor_config.tools = list(current_tools) + list(list(filesystem_tools.values()))
 
-        from andromeda.core.supervisor import Supervisor
+        from CodingLive.andromeda.core.supervisor import Supervisor
 
         self.supervisor = Supervisor(
             agents=report_agents,

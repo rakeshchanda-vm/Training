@@ -22,8 +22,8 @@ warnings.filterwarnings(
     category=LangChainPendingDeprecationWarning,
 )
 
-from andromeda.config.yaml_utils import yaml_load
-from andromeda.utils.ignore_rules import IgnoreMatcher
+from CodingLive.andromeda.config.yaml_utils import yaml_load
+from CodingLive.andromeda.utils.ignore_rules import IgnoreMatcher
 
 from .agents import build_workspace_agent, normalize_agent_payload
 from .context import RuntimeContext
@@ -41,7 +41,7 @@ from .validation import (
 )
 from .workflows import RuntimeWorkflow, WorkflowRunResult, parse_workflow_definition
 from .workflows import WorkflowValidationError as _WFV
-from andromeda import HumanMessage
+from CodingLive.andromeda import HumanMessage
 
 
 @dataclass

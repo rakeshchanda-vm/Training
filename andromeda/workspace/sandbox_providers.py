@@ -8,17 +8,17 @@ from typing import Any, Callable, Collection, Sequence
 
 _VALID_ENV_KEY_RE = re.compile(r'[A-Za-z_][A-Za-z0-9_]*')
 
-from andromeda.workspace.availability import ProviderAvailability
-from andromeda.workspace.paths import workspace_relative_cwd
-from andromeda.workspace.provider_settings import BubblewrapProcessSettings, GVisorContainerSettings
-from andromeda.workspace.providers import (
+from CodingLive.andromeda.workspace.availability import ProviderAvailability
+from CodingLive.andromeda.workspace.paths import workspace_relative_cwd
+from CodingLive.andromeda.workspace.provider_settings import BubblewrapProcessSettings, GVisorContainerSettings
+from CodingLive.andromeda.workspace.providers import (
     BaseWorkspaceProvider,
     ShellExecutionResult,
     WorkspaceProviderError,
     WorkspaceProviderState,
     _workspace_from_home,
 )
-from andromeda.workspace.sandbox import (
+from CodingLive.andromeda.workspace.sandbox import (
     SANDBOX_DENIED_ARGV,
     build_sandbox_env,
     log_shell_audit,
@@ -160,7 +160,7 @@ class BubblewrapProcessProvider(BaseWorkspaceProvider):
                 reason=f"Required host paths missing: {', '.join(missing)}",
                 details=details,
             )
-        from andromeda.workspace.policy import ShellPolicy
+        from CodingLive.andromeda.workspace.policy import ShellPolicy
 
         smoke_argv = build_bwrap_command(
             cfg,
